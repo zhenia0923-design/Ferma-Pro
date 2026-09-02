@@ -1,7 +1,7 @@
 # FERMA PRO
 
-Farm management application.
+Refactored farm-management application.
 
-## Development
+The original application is preserved as `legacy.html`. The active application is `app.html`, loaded by `index.html`.
 
-The application is being refactored to provide reliable livestock, warehouse, finance, reporting and editing workflows.
+Core workflows include broiler batches, headcount movement calculations, weighing, feed, treatment, sales, home use, laying hens, multi-ingredient recipes, finance and printable reports.
