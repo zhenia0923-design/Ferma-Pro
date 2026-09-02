@@ -1,0 +1,3878 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FERMA PRO</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f3f4f6;
+    color:#111827;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+.login{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+.login-box{
+    width:100%;
+    max-width:430px;
+    background:white;
+    padding:30px;
+    border-radius:18px;
+    box-shadow:0 10px 40px #0002;
+}
+.logo{
+    font-size:30px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:25px;
+}
+.logo span{color:#16a34a}
+
+.field{
+    margin-bottom:14px;
+}
+.field label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:5px;
+}
+input,select,textarea{
+    width:100%;
+    border:1px solid #d1d5db;
+    border-radius:9px;
+    padding:10px 12px;
+    background:white;
+}
+textarea{min-height:80px;resize:vertical}
+
+.btn{
+    border:0;
+    border-radius:9px;
+    padding:10px 15px;
+    font-weight:700;
+}
+.btn-primary{background:#16a34a;color:white}
+.btn-secondary{background:#e5e7eb;color:#111827}
+.btn-danger{background:#dc2626;color:white}
+.btn-blue{background:#2563eb;color:white}
+
+.app{
+    display:flex;
+    min-height:100vh;
+}
+.sidebar{
+    width:245px;
+    background:#111827;
+    color:white;
+    padding:20px 12px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    overflow:auto;
+}
+.brand{
+    font-size:23px;
+    font-weight:800;
+    padding:10px 12px 25px;
+}
+.brand span{color:#22c55e}
+
+.nav button{
+    width:100%;
+    text-align:left;
+    border:0;
+    background:transparent;
+    color:#d1d5db;
+    padding:12px;
+    border-radius:9px;
+    margin-bottom:4px;
+}
+.nav button:hover,
+.nav button.active{
+    background:#1f2937;
+    color:white;
+}
+
+.main{
+    margin-left:245px;
+    width:calc(100% - 245px);
+}
+.top{
+    background:white;
+    padding:15px 25px;
+    border-bottom:1px solid #e5e7eb;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+.content{
+    padding:25px;
+}
+.page-title{
+    font-size:28px;
+    font-weight:800;
+    margin-bottom:20px;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+.card{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    box-shadow:0 2px 10px #00000008;
+}
+.card-title{
+    color:#6b7280;
+    font-size:13px;
+}
+.card-value{
+    font-size:28px;
+    font-weight:800;
+    margin-top:7px;
+}
+
+.panel{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px #00000008;
+}
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+    flex-wrap:wrap;
+}
+.panel-title{
+    font-size:19px;
+    font-weight:800;
+}
+
+.table-wrap{
+    overflow:auto;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+th,td{
+    border-bottom:1px solid #e5e7eb;
+    padding:10px 8px;
+    text-align:left;
+    white-space:nowrap;
+}
+th{
+    background:#f9fafb;
+    font-size:13px;
+}
+td{font-size:14px}
+
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-gray{background:#e5e7eb;color:#374151}
+.badge-red{background:#fee2e2;color:#991b1b}
+
+.actions{
+    display:flex;
+    gap:5px;
+}
+.actions button{
+    padding:6px 9px;
+    border:0;
+    border-radius:7px;
+}
+
+.grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+.grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:#0008;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    z-index:100;
+}
+.modal-box{
+    background:white;
+    width:100%;
+    max-width:750px;
+    max-height:90vh;
+    overflow:auto;
+    border-radius:16px;
+    padding:25px;
+}
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:20px;
+}
+.close{
+    border:0;
+    background:#f3f4f6;
+    width:35px;
+    height:35px;
+    border-radius:50%;
+}
+.form-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:8px;
+    margin-top:20px;
+}
+
+.toast{
+    position:fixed;
+    right:20px;
+    bottom:20px;
+    background:#111827;
+    color:white;
+    padding:14px 18px;
+    border-radius:10px;
+    z-index:500;
+}
+
+@media(max-width:1000px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .grid3{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){
+    .sidebar{
+        width:65px;
+        padding:10px 6px;
+    }
+    .brand{
+        font-size:0;
+        text-align:center;
+    }
+    .brand span{font-size:20px}
+    .nav button{
+        font-size:0;
+        text-align:center;
+    }
+    .nav button:first-letter{
+        font-size:20px;
+    }
+    .main{
+        margin-left:65px;
+        width:calc(100% - 65px);
+    }
+    .content{padding:12px}
+    .cards{grid-template-columns:1fr 1fr}
+    .grid2,.grid3{grid-template-columns:1fr}
+    .page-title{font-size:22px}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login">
+    <div class="login-box">
+        <div class="logo">FERMA <span>PRO</span></div>
+
+        <div class="field">
+            <label>Email</label>
+            <input id="loginEmail" type="email">
+        </div>
+
+        <div class="field">
+            <label>Пароль</label>
+            <input id="loginPassword" type="password">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%" onclick="login()">
+            Увійти
+        </button>
+
+        <button class="btn btn-secondary" style="width:100%;margin-top:8px"
+                onclick="register()">
+            Створити акаунт
+        </button>
+
+        <div id="loginMessage" style="margin-top:15px;text-align:center"></div>
+    </div>
+</div>
+
+
+<!-- APP -->
+<div id="app" class="app hidden">
+
+    <aside class="sidebar">
+        <div class="brand">FERMA <span>PRO</span></div>
+
+        <div class="nav">
+            <button onclick="showPage('dashboard')" id="nav-dashboard">🏠 Головна</button>
+            <button onclick="showPage('broilers')" id="nav-broilers">🐔 Бройлери</button>
+            <button onclick="showPage('layers')" id="nav-layers">🥚 Кури-несучки</button>
+            <button onclick="showPage('feed')" id="nav-feed">🌾 Корми</button>
+            <button onclick="showPage('finance')" id="nav-finance">💰 Фінанси</button>
+            <button onclick="showPage('reports')" id="nav-reports">📊 Звіти</button>
+            <button onclick="showPage('clients')" id="nav-clients">👥 Клієнти</button>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="top">
+            <strong id="farmName">FERMA PRO</strong>
+            <button class="btn btn-secondary" onclick="logout()">Вийти</button>
+        </div>
+
+        <div class="content">
+
+            <!-- DASHBOARD -->
+            <section id="page-dashboard">
+                <div class="page-title">Головна</div>
+
+                <div class="cards">
+                    <div class="card">
+                        <div class="card-title">Активні партії бройлерів</div>
+                        <div class="card-value" id="dashBatches">0</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Бройлери</div>
+                        <div class="card-value" id="dashBroilers">0</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Несучки</div>
+                        <div class="card-value" id="dashLayers">0</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Яйця сьогодні</div>
+                        <div class="card-value" id="dashEggs">0</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Активні партії бройлерів</div>
+                        <button class="btn btn-primary" onclick="openBatchModal()">
+                            + Нова партія
+                        </button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Партія</th>
+                                    <th>Порода</th>
+                                    <th>Посадка</th>
+                                    <th>Вік</th>
+                                    <th>Голів</th>
+                                    <th>Середня вага</th>
+                                    <th>Маса</th>
+                                    <th>Корм</th>
+                                    <th>FCR</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboardBatches"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- BROILERS -->
+            <section id="page-broilers" class="hidden">
+                <div class="page-title">Бройлери</div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Партії</div>
+
+                        <button class="btn btn-primary" onclick="openBatchModal()">
+                            + Додати партію
+                        </button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Партія</th>
+                                    <th>Порода</th>
+                                    <th>Посадка</th>
+                                    <th>Початково</th>
+                                    <th>Зараз</th>
+                                    <th>Вага</th>
+                                    <th>Корм</th>
+                                    <th>FCR</th>
+                                    <th>Ціль</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="broilerBatches"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="batchDetails"></div>
+            </section>
+
+
+            <!-- LAYERS -->
+            <section id="page-layers" class="hidden">
+                <div class="page-title">Кури-несучки</div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Групи курей</div>
+                        <button class="btn btn-primary" onclick="openLayerModal()">
+                            + Додати групу
+                        </button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Група</th>
+                                    <th>Порода</th>
+                                    <th>Посадка</th>
+                                    <th>Було</th>
+                                    <th>Зараз</th>
+                                    <th>Яйця</th>
+                                    <th>Корм</th>
+                                    <th>Статус</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="layersTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- FEED -->
+            <section id="page-feed" class="hidden">
+                <div class="page-title">Корми</div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Інгредієнти</div>
+                        <button class="btn btn-primary" onclick="openIngredientModal()">
+                            + Інгредієнт
+                        </button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Назва</th>
+                                    <th>Ціна / кг</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ingredientsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Рекомендовані фази бройлера</div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Фаза</th>
+                                    <th>Назва</th>
+                                    <th>День від</th>
+                                    <th>День до</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feedPhasesTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- FINANCE -->
+            <section id="page-finance" class="hidden">
+                <div class="page-title">Фінанси</div>
+
+                <div class="cards">
+                    <div class="card">
+                        <div class="card-title">Витрати</div>
+                        <div class="card-value" id="totalExpenses">0 ₴</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Доходи</div>
+                        <div class="card-value" id="totalIncome">0 ₴</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Результат</div>
+                        <div class="card-value" id="financeResult">0 ₴</div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Операції</div>
+                        <button class="btn btn-primary" onclick="openFinanceModal()">
+                            + Операція
+                        </button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Тип</th>
+                                    <th>Категорія</th>
+                                    <th>Сума</th>
+                                    <th>Опис</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="financeTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- REPORTS -->
+            <section id="page-reports" class="hidden">
+                <div class="page-title">Звіти</div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Звіт по партії</div>
+                    </div>
+
+                    <div class="field">
+                        <label>Партія</label>
+                        <select id="reportBatch"></select>
+                    </div>
+
+                    <button class="btn btn-blue" onclick="generateReport()">
+                        Сформувати звіт
+                    </button>
+
+                    <button class="btn btn-secondary" onclick="window.print()">
+                        🖨 Друк
+                    </button>
+                </div>
+
+                <div id="reportResult"></div>
+            </section>
+
+
+            <!-- CLIENTS -->
+            <section id="page-clients" class="hidden">
+                <div class="page-title">Клієнти</div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Клієнти</div>
+                        <button class="btn btn-primary" onclick="openClientModal()">
+                            + Клієнт
+                        </button>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ім'я</th>
+                                    <th>Телефон</th>
+                                    <th>Адреса</th>
+                                    <th>Дії</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+
+<!-- MODAL -->
+<div id="modal" class="modal hidden">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 id="modalTitle">Додати</h2>
+            <button class="close" onclick="closeModal()">✕</button>
+        </div>
+
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+
+<script>
+
+/* ============================================================
+   SUPABASE
+============================================================ */
+
+const SUPABASE_URL = "https://axxormlcevusdjfqruib.supabase.co";
+const SUPABASE_KEY = "sb_publishable_fmFGe67Hi8_nUZC8sKP5xg_piWbDfZi";
+
+const supabaseClient =
+    window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+let currentUser = null;
+let batchesCache = [];
+let layersCache = [];
+
+
+/* ============================================================
+   AUTH
+============================================================ */
+
+async function login(){
+
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    if(!email || !password){
+        return message("Введіть email і пароль");
+    }
+
+    const {data,error} =
+        await supabaseClient.auth.signInWithPassword({
+            email,
+            password
+        });
+
+    if(error){
+        message(error.message);
+        return;
+    }
+
+    currentUser = data.user;
+
+    startApp();
+}
+
+
+async function register(){
+
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    if(!email || !password){
+        return message("Введіть email і пароль");
+    }
+
+    if(password.length < 6){
+        return message("Пароль мінімум 6 символів");
+    }
+
+    const {error} =
+        await supabaseClient.auth.signUp({
+            email,
+            password
+        });
+
+    if(error){
+        message(error.message);
+        return;
+    }
+
+    message("Акаунт створено. Якщо потрібно, підтвердіть email.");
+}
+
+
+async function logout(){
+
+    await supabaseClient.auth.signOut();
+
+    currentUser = null;
+
+    document.getElementById("app")
+        .classList.add("hidden");
+
+    document.getElementById("loginScreen")
+        .classList.remove("hidden");
+}
+
+
+supabaseClient.auth.onAuthStateChange(
+    (event,session)=>{
+
+        if(session?.user){
+
+            currentUser=session.user;
+
+            startApp();
+
+        }else{
+
+            currentUser=null;
+
+        }
+
+    }
+);
+
+
+function startApp(){
+
+    document.getElementById("loginScreen")
+        .classList.add("hidden");
+
+    document.getElementById("app")
+        .classList.remove("hidden");
+
+    loadAll();
+}
+
+
+function message(text){
+
+    document.getElementById("loginMessage")
+        .textContent=text;
+}
+
+
+function toast(text){
+
+    const el=document.getElementById("toast");
+
+    el.textContent=text;
+
+    el.classList.remove("hidden");
+
+    setTimeout(()=>{
+        el.classList.add("hidden");
+    },2500);
+}
+
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+
+function showPage(page){
+
+    document.querySelectorAll("main section")
+        .forEach(x=>x.classList.add("hidden"));
+
+    document
+        .getElementById("page-"+page)
+        .classList.remove("hidden");
+
+    document.querySelectorAll(".nav button")
+        .forEach(x=>x.classList.remove("active"));
+
+    const nav=document.getElementById("nav-"+page);
+
+    if(nav) nav.classList.add("active");
+
+    if(page==="dashboard") loadDashboard();
+    if(page==="broilers") loadBroilers();
+    if(page==="layers") loadLayers();
+    if(page==="feed") loadFeed();
+    if(page==="finance") loadFinance();
+    if(page==="reports") loadReportSelectors();
+    if(page==="clients") loadClients();
+}
+
+
+/* ============================================================
+   LOAD ALL
+============================================================ */
+
+async function loadAll(){
+
+    await loadSettings();
+    await loadDashboard();
+}
+
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+
+async function loadSettings(){
+
+    const {data,error}=await supabaseClient
+        .from("farm_settings")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .maybeSingle();
+
+    if(!error && data){
+
+        document.getElementById("farmName")
+            .textContent=data.farm_name || "FERMA PRO";
+    }
+}
+
+
+/* ============================================================
+   BATCHES
+============================================================ */
+
+async function getBatches(){
+
+    const {data,error}=await supabaseClient
+        .from("broiler_batches")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .order("created_at",{ascending:false});
+
+    if(error){
+
+        console.error(error);
+
+        toast("Помилка завантаження партій");
+
+        return [];
+
+    }
+
+    batchesCache=data || [];
+
+    return batchesCache;
+}
+
+
+function ageDays(date){
+
+    if(!date) return 0;
+
+    const start=new Date(date);
+    const now=new Date();
+
+    start.setHours(0,0,0,0);
+    now.setHours(0,0,0,0);
+
+    return Math.max(
+        0,
+        Math.floor((now-start)/86400000)+1
+    );
+}
+
+
+async function getBatchStats(batch){
+
+    const {data:daily}=await supabaseClient
+        .from("broiler_daily")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",batch.id)
+        .order("record_date",{ascending:false});
+
+    const {data:weights}=await supabaseClient
+        .from("broiler_weights")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",batch.id)
+        .order("record_date",{ascending:false});
+
+    const records=daily || [];
+    const ws=weights || [];
+
+    const latest=records[0];
+
+    let heads=
+        latest?.heads ??
+        batch.initial_heads;
+
+    const mortality=records.reduce(
+        (sum,r)=>sum+(Number(r.mortality)||0),
+        0
+    );
+
+    const feed=records.reduce(
+        (sum,r)=>sum+
+        (Number(r.feed_kg)||0)+
+        (Number(r.feed_starter_kg)||0)+
+        (Number(r.feed_g1520_kg)||0)+
+        (Number(r.feed_g2128_kg)||0)+
+        (Number(r.feed_g2935_kg)||0)+
+        (Number(r.feed_f3642_kg)||0)+
+        (Number(r.feed_f4350_kg)||0),
+        0
+    );
+
+    const weight=
+        ws.length ?
+        Number(ws[0].average_weight_g)||0 :
+        0;
+
+    const mass=weight*heads/1000;
+
+    const fcr=
+        mass>0 ?
+        feed/mass :
+        0;
+
+    return {
+        heads,
+        mortality,
+        feed,
+        weight,
+        mass,
+        fcr,
+        latest,
+        weights:ws
+    };
+}
+
+
+/* ============================================================
+   DASHBOARD
+============================================================ */
+
+async function loadDashboard(){
+
+    const batches=await getBatches();
+
+    const active=batches.filter(
+        b=>b.status==="active"
+    );
+
+    document.getElementById("dashBatches")
+        .textContent=active.length;
+
+    let totalBroilers=0;
+
+    let html="";
+
+    for(const batch of active){
+
+        const s=await getBatchStats(batch);
+
+        totalBroilers+=Number(s.heads)||0;
+
+        html+=`
+
+        <tr>
+
+            <td><strong>${esc(batch.name)}</strong></td>
+
+            <td>${esc(batch.breed||"")}</td>
+
+            <td>${batch.placement_date}</td>
+
+            <td>${ageDays(batch.placement_date)} дн.</td>
+
+            <td>${s.heads}</td>
+
+            <td>${s.weight ? s.weight.toFixed(0)+" г" : "—"}</td>
+
+            <td>${s.mass ? s.mass.toFixed(1)+" кг" : "—"}</td>
+
+            <td>${s.feed.toFixed(1)} кг</td>
+
+            <td>${s.fcr ? s.fcr.toFixed(2) : "—"}</td>
+
+            <td>
+                <span class="badge badge-green">
+                    Активна
+                </span>
+            </td>
+
+            <td>
+                <div class="actions">
+
+                    <button
+                        style="background:#dbeafe"
+                        onclick="openBatchDetails('${batch.id}')">
+                        👁
+                    </button>
+
+                    <button
+                        style="background:#fef3c7"
+                        onclick="openBatchModal('${batch.id}')">
+                        ✏️
+                    </button>
+
+                    <button
+                        style="background:#fee2e2"
+                        onclick="archiveBatch('${batch.id}')">
+                        📦
+                    </button>
+
+                </div>
+            </td>
+
+        </tr>
+
+        `;
+    }
+
+    document.getElementById("dashboardBatches")
+        .innerHTML=html || `
+        <tr>
+            <td colspan="11" style="text-align:center">
+                Немає активних партій
+            </td>
+        </tr>`;
+
+    document.getElementById("dashBroilers")
+        .textContent=totalBroilers;
+
+    const {data:layers}=await supabaseClient
+        .from("layer_flocks")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("status","active");
+
+    document.getElementById("dashLayers")
+        .textContent=(layers||[]).reduce(
+            (s,x)=>s+(Number(x.current_heads)||0),
+            0
+        );
+
+    const today=new Date()
+        .toISOString()
+        .slice(0,10);
+
+    const {data:egg}=await supabaseClient
+        .from("layer_daily")
+        .select("eggs")
+        .eq("user_id",currentUser.id)
+        .eq("record_date",today);
+
+    document.getElementById("dashEggs")
+        .textContent=(egg||[]).reduce(
+            (s,x)=>s+(Number(x.eggs)||0),
+            0
+        );
+}
+
+
+/* ============================================================
+   BROILER PAGE
+============================================================ */
+
+async function loadBroilers(){
+
+    const batches=await getBatches();
+
+    let html="";
+
+    for(const batch of batches){
+
+        const s=await getBatchStats(batch);
+
+        html+=`
+
+        <tr>
+
+            <td><strong>${esc(batch.name)}</strong></td>
+
+            <td>${esc(batch.breed||"")}</td>
+
+            <td>${batch.placement_date}</td>
+
+            <td>${batch.initial_heads}</td>
+
+            <td>${s.heads}</td>
+
+            <td>${s.weight ? s.weight.toFixed(0)+" г":"—"}</td>
+
+            <td>${s.feed.toFixed(1)} кг</td>
+
+            <td>${s.fcr ? s.fcr.toFixed(2):"—"}</td>
+
+            <td>${Number(batch.target_weight||0).toFixed(1)} кг</td>
+
+            <td>
+                <span class="badge ${
+                    batch.status==="active"
+                    ?"badge-green"
+                    :"badge-gray"
+                }">
+                    ${batch.status==="active"?"Активна":"Архів"}
+                </span>
+            </td>
+
+            <td>
+                <div class="actions">
+
+                    <button
+                        style="background:#dbeafe"
+                        onclick="openBatchDetails('${batch.id}')">
+                        👁
+                    </button>
+
+                    <button
+                        style="background:#fef3c7"
+                        onclick="openBatchModal('${batch.id}')">
+                        ✏️
+                    </button>
+
+                    ${
+                        batch.status==="active"
+                        ?`
+                        <button
+                        style="background:#fee2e2"
+                        onclick="archiveBatch('${batch.id}')">
+                        📦
+                        </button>`
+                        :""
+                    }
+
+                    <button
+                        style="background:#fee2e2"
+                        onclick="deleteBatch('${batch.id}')">
+                        🗑
+                    </button>
+
+                </div>
+            </td>
+
+        </tr>
+
+        `;
+    }
+
+    document.getElementById("broilerBatches")
+        .innerHTML=html || `
+        <tr>
+            <td colspan="11" style="text-align:center">
+                Партій ще немає
+            </td>
+        </tr>`;
+}
+
+
+/* ============================================================
+   BATCH MODAL
+============================================================ */
+
+async function openBatchModal(id=null){
+
+    let batch=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("broiler_batches")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        batch=data;
+    }
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування партії"
+        :"Нова партія";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Назва партії *</label>
+                <input id="b_name"
+                    value="${escAttr(batch?.name||"Партія №1")}">
+            </div>
+
+            <div class="field">
+                <label>Порода</label>
+                <input id="b_breed"
+                    value="${escAttr(batch?.breed||"Cobb 500")}">
+            </div>
+
+            <div class="field">
+                <label>Дата посадки *</label>
+                <input id="b_date"
+                    type="date"
+                    value="${batch?.placement_date || today()}">
+            </div>
+
+            <div class="field">
+                <label>Початкова кількість *</label>
+                <input id="b_heads"
+                    type="number"
+                    min="0"
+                    value="${batch?.initial_heads ?? 0}">
+            </div>
+
+            <div class="field">
+                <label>Ціна курчати, грн</label>
+                <input id="b_price"
+                    type="number"
+                    step="0.01"
+                    value="${batch?.chick_price ?? 0}">
+            </div>
+
+            <div class="field">
+                <label>Цільова вага, кг</label>
+                <input id="b_target"
+                    type="number"
+                    step="0.1"
+                    value="${batch?.target_weight ?? 4.8}">
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Примітки</label>
+            <textarea id="b_notes">${esc(batch?.notes||"")}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-secondary"
+                    onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                    onclick="saveBatch('${id||""}')">
+                Зберегти
+            </button>
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveBatch(id){
+
+    const payload={
+        user_id:currentUser.id,
+        name:document.getElementById("b_name").value.trim(),
+        breed:document.getElementById("b_breed").value.trim(),
+        placement_date:document.getElementById("b_date").value,
+        initial_heads:Number(
+            document.getElementById("b_heads").value
+        )||0,
+        chick_price:Number(
+            document.getElementById("b_price").value
+        )||0,
+        target_weight:Number(
+            document.getElementById("b_target").value
+        )||0,
+        notes:document.getElementById("b_notes").value.trim()
+    };
+
+    if(!payload.name){
+        return toast("Вкажіть назву партії");
+    }
+
+    if(!payload.placement_date){
+        return toast("Вкажіть дату посадки");
+    }
+
+    if(id){
+
+        const {error}=await supabaseClient
+            .from("broiler_batches")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id);
+
+        if(error){
+            console.error(error);
+            return toast("Помилка редагування");
+        }
+
+        toast("Партію оновлено");
+
+    }else{
+
+        const {error}=await supabaseClient
+            .from("broiler_batches")
+            .insert(payload);
+
+        if(error){
+            console.error(error);
+            return toast("Помилка створення партії");
+        }
+
+        toast("Партію створено");
+    }
+
+    closeModal();
+
+    await loadDashboard();
+    await loadBroilers();
+}
+
+
+/* ============================================================
+   BATCH DETAILS
+============================================================ */
+
+async function openBatchDetails(id){
+
+    const batch=batchesCache.find(x=>x.id===id);
+
+    if(!batch) return;
+
+    const s=await getBatchStats(batch);
+
+    document.getElementById("batchDetails")
+        .innerHTML=`
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <div class="panel-title">
+                        ${esc(batch.name)}
+                    </div>
+
+                    <small>
+                        ${esc(batch.breed||"")} |
+                        посадка ${batch.placement_date} |
+                        вік ${ageDays(batch.placement_date)} днів
+                    </small>
+                </div>
+
+                <div class="actions">
+
+                    <button class="btn btn-primary"
+                        onclick="openDailyModal('${id}')">
+                        + Облік дня
+                    </button>
+
+                    <button class="btn btn-blue"
+                        onclick="openWeightModal('${id}')">
+                        ⚖️ Зважування
+                    </button>
+
+                    <button class="btn btn-secondary"
+                        onclick="openTreatmentModal('${id}')">
+                        💊 Лікування
+                    </button>
+
+                    <button class="btn btn-primary"
+                        onclick="openSaleModal('${id}')">
+                        💰 Продаж
+                    </button>
+
+                    <button class="btn btn-secondary"
+                        onclick="openHomeUseModal('${id}')">
+                        🏠 Додому
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="cards">
+
+                <div class="card">
+                    <div class="card-title">Голів</div>
+                    <div class="card-value">${s.heads}</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Середня вага</div>
+                    <div class="card-value">
+                        ${s.weight ? s.weight.toFixed(0)+" г":"—"}
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">Загальна маса</div>
+                    <div class="card-value">
+                        ${s.mass.toFixed(1)} кг
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">FCR</div>
+                    <div class="card-value">
+                        ${s.fcr ? s.fcr.toFixed(2):"—"}
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="grid2">
+
+                <div>
+
+                    <h3>Зважування</h3>
+
+                    <div class="table-wrap">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>День</th>
+                                <th>Середня</th>
+                                <th>Вибірка</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="weights-${id}"></tbody>
+
+                    </table>
+
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <h3>Щоденний облік</h3>
+
+                    <div class="table-wrap">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Голів</th>
+                                <th>Падіж</th>
+                                <th>Корм</th>
+                                <th>Вода</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="daily-${id}"></tbody>
+
+                    </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    const {data:weights}=await supabaseClient
+        .from("broiler_weights")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",id)
+        .order("record_date",{ascending:false});
+
+    document.getElementById(`weights-${id}`)
+        .innerHTML=(weights||[]).map(w=>`
+
+        <tr>
+
+            <td>${w.record_date}</td>
+
+            <td>${w.growing_day ?? "—"}</td>
+
+            <td>${Number(w.average_weight_g).toFixed(0)} г</td>
+
+            <td>${w.sample_heads||0}</td>
+
+            <td>
+                <div class="actions">
+
+                    <button
+                    style="background:#fef3c7"
+                    onclick="openWeightModal('${id}','${w.id}')">
+                    ✏️
+                    </button>
+
+                    <button
+                    style="background:#fee2e2"
+                    onclick="deleteWeight('${w.id}','${id}')">
+                    🗑
+                    </button>
+
+                </div>
+            </td>
+
+        </tr>
+
+        `).join("") || `
+        <tr><td colspan="5">Немає зважувань</td></tr>`;
+
+
+    const {data:daily}=await supabaseClient
+        .from("broiler_daily")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",id)
+        .order("record_date",{ascending:false});
+
+    document.getElementById(`daily-${id}`)
+        .innerHTML=(daily||[]).map(d=>`
+
+        <tr>
+
+            <td>${d.record_date}</td>
+
+            <td>${d.heads}</td>
+
+            <td>${d.mortality}</td>
+
+            <td>${totalFeedRecord(d).toFixed(1)} кг</td>
+
+            <td>${Number(d.water_liters||0).toFixed(1)} л</td>
+
+            <td>
+
+                <div class="actions">
+
+                    <button
+                    style="background:#fef3c7"
+                    onclick="openDailyModal('${id}','${d.id}')">
+                    ✏️
+                    </button>
+
+                    <button
+                    style="background:#fee2e2"
+                    onclick="deleteDaily('${d.id}','${id}')">
+                    🗑
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        `).join("") || `
+        <tr><td colspan="6">Немає записів</td></tr>`;
+}
+
+
+/* ============================================================
+   DAILY
+============================================================ */
+
+function totalFeedRecord(d){
+
+    return Number(d.feed_starter_kg||0)+
+        Number(d.feed_g1520_kg||0)+
+        Number(d.feed_g2128_kg||0)+
+        Number(d.feed_g2935_kg||0)+
+        Number(d.feed_f3642_kg||0)+
+        Number(d.feed_f4350_kg||0);
+}
+
+
+async function openDailyModal(batchId,id=null){
+
+    let row=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("broiler_daily")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        row=data;
+    }
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування щоденного обліку"
+        :"Новий щоденний облік";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Дата</label>
+                <input id="d_date"
+                    type="date"
+                    value="${row?.record_date||today()}">
+            </div>
+
+            <div class="field">
+                <label>Залишок голів</label>
+                <input id="d_heads"
+                    type="number"
+                    min="0"
+                    value="${row?.heads??0}">
+            </div>
+
+            <div class="field">
+                <label>Падіж</label>
+                <input id="d_mortality"
+                    type="number"
+                    min="0"
+                    value="${row?.mortality??0}">
+            </div>
+
+            <div class="field">
+                <label>Вода, л</label>
+                <input id="d_water"
+                    type="number"
+                    step="0.1"
+                    value="${row?.water_liters??0}">
+            </div>
+
+        </div>
+
+
+        <h3>Корм, кг</h3>
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Стартер</label>
+                <input id="d_starter"
+                    type="number"
+                    step="0.01"
+                    value="${row?.feed_starter_kg??0}">
+            </div>
+
+            <div class="field">
+                <label>Гровер 15–20</label>
+                <input id="d_g1520"
+                    type="number"
+                    step="0.01"
+                    value="${row?.feed_g1520_kg??0}">
+            </div>
+
+            <div class="field">
+                <label>Гровер 21–28</label>
+                <input id="d_g2128"
+                    type="number"
+                    step="0.01"
+                    value="${row?.feed_g2128_kg??0}">
+            </div>
+
+            <div class="field">
+                <label>Гровер 29–35</label>
+                <input id="d_g2935"
+                    type="number"
+                    step="0.01"
+                    value="${row?.feed_g2935_kg??0}">
+            </div>
+
+            <div class="field">
+                <label>Фініш 36–42</label>
+                <input id="d_f3642"
+                    type="number"
+                    step="0.01"
+                    value="${row?.feed_f3642_kg??0}">
+            </div>
+
+            <div class="field">
+                <label>Фініш 43–50</label>
+                <input id="d_f4350"
+                    type="number"
+                    step="0.01"
+                    value="${row?.feed_f4350_kg??0}">
+            </div>
+
+        </div>
+
+
+        <div class="field">
+            <label>Препарат / примітка</label>
+            <input id="d_medicine"
+                value="${escAttr(row?.medicine||"")}">
+        </div>
+
+
+        <div class="field">
+            <label>Примітки</label>
+            <textarea id="d_notes">${esc(row?.notes||"")}</textarea>
+        </div>
+
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveDaily('${batchId}','${id||""}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveDaily(batchId,id){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        batch_id:batchId,
+
+        record_date:
+            document.getElementById("d_date").value,
+
+        heads:Number(
+            document.getElementById("d_heads").value
+        )||0,
+
+        mortality:Number(
+            document.getElementById("d_mortality").value
+        )||0,
+
+        water_liters:Number(
+            document.getElementById("d_water").value
+        )||0,
+
+        feed_starter_kg:Number(
+            document.getElementById("d_starter").value
+        )||0,
+
+        feed_g1520_kg:Number(
+            document.getElementById("d_g1520").value
+        )||0,
+
+        feed_g2128_kg:Number(
+            document.getElementById("d_g2128").value
+        )||0,
+
+        feed_g2935_kg:Number(
+            document.getElementById("d_g2935").value
+        )||0,
+
+        feed_f3642_kg:Number(
+            document.getElementById("d_f3642").value
+        )||0,
+
+        feed_f4350_kg:Number(
+            document.getElementById("d_f4350").value
+        )||0,
+
+        medicine:
+            document.getElementById("d_medicine").value.trim(),
+
+        notes:
+            document.getElementById("d_notes").value.trim()
+    };
+
+
+    payload.feed_kg=
+        totalFeedRecord(payload);
+
+
+    let error;
+
+    if(id){
+
+        ({error}=await supabaseClient
+            .from("broiler_daily")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id));
+
+    }else{
+
+        ({error}=await supabaseClient
+            .from("broiler_daily")
+            .insert(payload));
+
+    }
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка збереження");
+
+    }
+
+    toast(id?"Запис оновлено":"Запис додано");
+
+    closeModal();
+
+    await loadDashboard();
+    await loadBroilers();
+
+    openBatchDetails(batchId);
+}
+
+
+/* ============================================================
+   WEIGHTS
+============================================================ */
+
+async function openWeightModal(batchId,id=null){
+
+    let row=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("broiler_weights")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        row=data;
+    }
+
+    const batch=batchesCache.find(x=>x.id===batchId);
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування зважування"
+        :"Нове зважування";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Дата</label>
+                <input id="w_date"
+                    type="date"
+                    value="${row?.record_date||today()}">
+            </div>
+
+            <div class="field">
+                <label>День вирощування</label>
+                <input id="w_day"
+                    type="number"
+                    value="${row?.growing_day ??
+                    (batch ? ageDays(batch.placement_date):1)}">
+            </div>
+
+            <div class="field">
+                <label>Середня вага, г *</label>
+                <input id="w_weight"
+                    type="number"
+                    step="0.1"
+                    value="${row?.average_weight_g??0}">
+            </div>
+
+            <div class="field">
+                <label>Кількість зважених</label>
+                <input id="w_sample"
+                    type="number"
+                    min="1"
+                    value="${row?.sample_heads??10}">
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Примітки</label>
+            <textarea id="w_notes">${esc(row?.notes||"")}</textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveWeight('${batchId}','${id||""}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveWeight(batchId,id){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        batch_id:batchId,
+
+        record_date:
+            document.getElementById("w_date").value,
+
+        growing_day:Number(
+            document.getElementById("w_day").value
+        )||0,
+
+        average_weight_g:Number(
+            document.getElementById("w_weight").value
+        )||0,
+
+        sample_heads:Number(
+            document.getElementById("w_sample").value
+        )||0,
+
+        notes:
+            document.getElementById("w_notes").value.trim()
+    };
+
+    let error;
+
+    if(id){
+
+        ({error}=await supabaseClient
+            .from("broiler_weights")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id));
+
+    }else{
+
+        ({error}=await supabaseClient
+            .from("broiler_weights")
+            .insert(payload));
+
+    }
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка зважування");
+
+    }
+
+    closeModal();
+
+    toast(id?"Зважування оновлено":"Зважування додано");
+
+    openBatchDetails(batchId);
+
+    loadDashboard();
+}
+
+
+async function deleteWeight(id,batchId){
+
+    if(!confirm("Видалити це зважування?")) return;
+
+    const {error}=await supabaseClient
+        .from("broiler_weights")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error) return toast("Помилка видалення");
+
+    toast("Зважування видалено");
+
+    openBatchDetails(batchId);
+}
+
+
+/* ============================================================
+   TREATMENTS
+============================================================ */
+
+async function openTreatmentModal(batchId){
+
+    document.getElementById("modalTitle")
+        .textContent="Лікування";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Дата</label>
+                <input id="t_date"
+                    type="date"
+                    value="${today()}">
+            </div>
+
+            <div class="field">
+                <label>День вирощування</label>
+                <input id="t_day"
+                    type="number"
+                    value="${ageDays(
+                        batchesCache.find(x=>x.id===batchId)
+                        ?.placement_date
+                    )}">
+            </div>
+
+            <div class="field">
+                <label>Препарат *</label>
+                <input id="t_name">
+            </div>
+
+            <div class="field">
+                <label>Концентрація</label>
+                <input id="t_concentration"
+                    placeholder="10%">
+            </div>
+
+            <div class="field">
+                <label>Дозування</label>
+                <input id="t_dose"
+                    placeholder="1 мл/л">
+            </div>
+
+            <div class="field">
+                <label>Використано, мл</label>
+                <input id="t_ml"
+                    type="number"
+                    step="0.1"
+                    value="0">
+            </div>
+
+            <div class="field">
+                <label>Ціна за 10 мл, грн</label>
+                <input id="t_price"
+                    type="number"
+                    step="0.01"
+                    value="0">
+            </div>
+
+        </div>
+
+        <div class="card" style="margin-top:10px">
+            Вартість препарату:
+            <strong id="t_cost">0.00 грн</strong>
+        </div>
+
+        <div class="field" style="margin-top:15px">
+            <label>Примітки</label>
+            <textarea id="t_notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveTreatment('${batchId}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    document.getElementById("t_ml")
+        .addEventListener("input",updateTreatmentCost);
+
+    document.getElementById("t_price")
+        .addEventListener("input",updateTreatmentCost);
+
+    openModal();
+}
+
+
+function updateTreatmentCost(){
+
+    const ml=Number(
+        document.getElementById("t_ml").value
+    )||0;
+
+    const price=Number(
+        document.getElementById("t_price").value
+    )||0;
+
+    document.getElementById("t_cost")
+        .textContent=
+        ((ml/10)*price).toFixed(2)+" грн";
+}
+
+
+async function saveTreatment(batchId){
+
+    const ml=Number(
+        document.getElementById("t_ml").value
+    )||0;
+
+    const price=Number(
+        document.getElementById("t_price").value
+    )||0;
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        batch_id:batchId,
+
+        treatment_date:
+            document.getElementById("t_date").value,
+
+        growing_day:Number(
+            document.getElementById("t_day").value
+        )||0,
+
+        medicine_name:
+            document.getElementById("t_name").value.trim(),
+
+        ml_used:ml,
+
+        price_per_10ml:price,
+
+        notes:
+            document.getElementById("t_notes").value.trim()
+    };
+
+    if(!payload.medicine_name)
+        return toast("Вкажіть препарат");
+
+    const {error}=await supabaseClient
+        .from("broiler_treatments")
+        .insert(payload);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка лікування");
+
+    }
+
+    closeModal();
+
+    toast(
+        `Лікування додано. Вартість ${(
+            ml/10*price
+        ).toFixed(2)} грн`
+    );
+}
+
+
+/* ============================================================
+   SALES
+============================================================ */
+
+async function openSaleModal(batchId){
+
+    document.getElementById("modalTitle")
+        .textContent="Продаж бройлерів";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Дата</label>
+                <input id="s_date"
+                    type="date"
+                    value="${today()}">
+            </div>
+
+            <div class="field">
+                <label>Кількість голів</label>
+                <input id="s_heads"
+                    type="number"
+                    value="0">
+            </div>
+
+            <div class="field">
+                <label>Середня вага, г</label>
+                <input id="s_avg"
+                    type="number"
+                    step="0.1"
+                    value="0">
+            </div>
+
+            <div class="field">
+                <label>Ціна за кг</label>
+                <input id="s_price"
+                    type="number"
+                    step="0.01"
+                    value="0">
+            </div>
+
+            <div class="field">
+                <label>Покупець</label>
+                <input id="s_buyer">
+            </div>
+
+        </div>
+
+        <div class="card">
+            Загальна маса:
+            <strong id="s_mass">0 кг</strong>
+            <br>
+            Виручка:
+            <strong id="s_revenue">0 грн</strong>
+        </div>
+
+        <div class="field" style="margin-top:15px">
+            <label>Примітки</label>
+            <textarea id="s_notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveSale('${batchId}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    ["s_heads","s_avg","s_price"]
+        .forEach(id=>{
+            document.getElementById(id)
+                .addEventListener("input",calcSale);
+        });
+
+    openModal();
+}
+
+
+function calcSale(){
+
+    const heads=Number(
+        document.getElementById("s_heads").value
+    )||0;
+
+    const avg=Number(
+        document.getElementById("s_avg").value
+    )||0;
+
+    const price=Number(
+        document.getElementById("s_price").value
+    )||0;
+
+    const mass=heads*avg/1000;
+    const revenue=mass*price;
+
+    document.getElementById("s_mass")
+        .textContent=mass.toFixed(2)+" кг";
+
+    document.getElementById("s_revenue")
+        .textContent=revenue.toFixed(2)+" грн";
+}
+
+
+async function saveSale(batchId){
+
+    const heads=Number(
+        document.getElementById("s_heads").value
+    )||0;
+
+    const avg=Number(
+        document.getElementById("s_avg").value
+    )||0;
+
+    const price=Number(
+        document.getElementById("s_price").value
+    )||0;
+
+    const totalWeight=heads*avg/1000;
+    const revenue=totalWeight*price;
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        batch_id:batchId,
+
+        sale_date:
+            document.getElementById("s_date").value,
+
+        heads,
+
+        average_weight_g:avg,
+
+        total_weight_kg:totalWeight,
+
+        price_per_kg:price,
+
+        revenue,
+
+        buyer:
+            document.getElementById("s_buyer").value.trim(),
+
+        notes:
+            document.getElementById("s_notes").value.trim()
+    };
+
+    const {error}=await supabaseClient
+        .from("broiler_sales")
+        .insert(payload);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка продажу");
+
+    }
+
+    closeModal();
+
+    toast(
+        `Продаж записано на ${revenue.toFixed(2)} грн`
+    );
+}
+
+
+/* ============================================================
+   HOME USE
+============================================================ */
+
+async function openHomeUseModal(batchId){
+
+    document.getElementById("modalTitle")
+        .textContent="Забрати додому";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Дата</label>
+                <input id="h_date"
+                    type="date"
+                    value="${today()}">
+            </div>
+
+            <div class="field">
+                <label>Кількість голів</label>
+                <input id="h_heads"
+                    type="number"
+                    value="0">
+            </div>
+
+            <div class="field">
+                <label>Вага, кг</label>
+                <input id="h_weight"
+                    type="number"
+                    step="0.01"
+                    value="0">
+            </div>
+
+            <div class="field">
+                <label>Оціночна вартість, грн</label>
+                <input id="h_value"
+                    type="number"
+                    step="0.01"
+                    value="0">
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Продукт</label>
+            <input id="h_product"
+                value="Бройлер">
+        </div>
+
+        <div class="field">
+            <label>Примітки</label>
+            <textarea id="h_notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveHomeUse('${batchId}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveHomeUse(batchId){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        batch_id:batchId,
+
+        use_date:
+            document.getElementById("h_date").value,
+
+        product:
+            document.getElementById("h_product").value.trim(),
+
+        quantity:Number(
+            document.getElementById("h_heads").value
+        )||0,
+
+        weight_kg:Number(
+            document.getElementById("h_weight").value
+        )||0,
+
+        estimated_value:Number(
+            document.getElementById("h_value").value
+        )||0,
+
+        notes:
+            document.getElementById("h_notes").value.trim()
+    };
+
+    const {error}=await supabaseClient
+        .from("home_uses")
+        .insert(payload);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка запису");
+
+    }
+
+    closeModal();
+
+    toast("Забір додому записано");
+}
+
+
+/* ============================================================
+   ARCHIVE / DELETE
+============================================================ */
+
+async function archiveBatch(id){
+
+    if(!confirm(
+        "Перемістити партію в архів?"
+    )) return;
+
+    const {error}=await supabaseClient
+        .from("broiler_batches")
+        .update({
+            status:"archived",
+            archived_at:new Date().toISOString()
+        })
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка архівації");
+
+    }
+
+    toast("Партію переміщено в архів");
+
+    loadDashboard();
+    loadBroilers();
+}
+
+
+async function deleteBatch(id){
+
+    if(!confirm(
+        "УВАГА! Видалити партію та пов'язані записи?"
+    )) return;
+
+    /*
+       Спочатку видаляємо залежні записи.
+    */
+
+    const tables=[
+        "broiler_daily",
+        "broiler_weights",
+        "broiler_treatments",
+        "broiler_sales",
+        "broiler_home_slaughter"
+    ];
+
+    for(const table of tables){
+
+        const {error}=await supabaseClient
+            .from(table)
+            .delete()
+            .eq("batch_id",id)
+            .eq("user_id",currentUser.id);
+
+        if(error){
+
+            console.error(table,error);
+
+            return toast(
+                "Не вдалося видалити "+table
+            );
+        }
+    }
+
+    const {error}=await supabaseClient
+        .from("broiler_batches")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка видалення партії");
+
+    }
+
+    toast("Партію видалено");
+
+    loadDashboard();
+    loadBroilers();
+}
+
+
+/* ============================================================
+   LAYERS
+============================================================ */
+
+async function loadLayers(){
+
+    const {data,error}=await supabaseClient
+        .from("layer_flocks")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .order("created_at",{ascending:false});
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка завантаження курей");
+
+    }
+
+    layersCache=data||[];
+
+    let html="";
+
+    for(const flock of layersCache){
+
+        const {data:daily}=await supabaseClient
+            .from("layer_daily")
+            .select("*")
+            .eq("user_id",currentUser.id)
+            .eq("flock_id",flock.id)
+            .order("record_date",{ascending:false});
+
+        const eggs=(daily||[]).reduce(
+            (s,x)=>s+(Number(x.eggs)||0),
+            0
+        );
+
+        const feed=(daily||[]).reduce(
+            (s,x)=>s+(Number(x.feed_kg)||0),
+            0
+        );
+
+        html+=`
+
+        <tr>
+
+            <td>${esc(flock.name)}</td>
+
+            <td>${esc(flock.breed||"")}</td>
+
+            <td>${flock.placement_date||"—"}</td>
+
+            <td>${flock.initial_heads||0}</td>
+
+            <td>${flock.current_heads||0}</td>
+
+            <td>${eggs}</td>
+
+            <td>${feed.toFixed(1)} кг</td>
+
+            <td>
+                <span class="badge ${
+                    flock.status==="active"
+                    ?"badge-green"
+                    :"badge-gray"
+                }">
+                    ${flock.status==="active"
+                    ?"Активна"
+                    :"Архів"}
+                </span>
+            </td>
+
+            <td>
+
+                <div class="actions">
+
+                    <button
+                    style="background:#fef3c7"
+                    onclick="openLayerModal('${flock.id}')">
+                    ✏️
+                    </button>
+
+                    <button
+                    style="background:#fee2e2"
+                    onclick="deleteLayer('${flock.id}')">
+                    🗑
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        `;
+    }
+
+    document.getElementById("layersTable")
+        .innerHTML=html || `
+        <tr>
+            <td colspan="9" style="text-align:center">
+                Груп немає
+            </td>
+        </tr>`;
+}
+
+
+async function openLayerModal(id=null){
+
+    let flock=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("layer_flocks")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        flock=data;
+    }
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування групи"
+        :"Нова група";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Назва</label>
+                <input id="l_name"
+                    value="${escAttr(flock?.name||"Несучки №1")}">
+            </div>
+
+            <div class="field">
+                <label>Порода</label>
+                <input id="l_breed"
+                    value="${escAttr(flock?.breed||"Dominant")}">
+            </div>
+
+            <div class="field">
+                <label>Дата посадки</label>
+                <input id="l_date"
+                    type="date"
+                    value="${flock?.placement_date||today()}">
+            </div>
+
+            <div class="field">
+                <label>Початкова кількість</label>
+                <input id="l_initial"
+                    type="number"
+                    value="${flock?.initial_heads??0}">
+            </div>
+
+            <div class="field">
+                <label>Поточна кількість</label>
+                <input id="l_current"
+                    type="number"
+                    value="${flock?.current_heads??0}">
+            </div>
+
+            <div class="field">
+                <label>Ціна курки</label>
+                <input id="l_price"
+                    type="number"
+                    step="0.01"
+                    value="${flock?.hen_price??0}">
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Примітки</label>
+            <textarea id="l_notes">${esc(flock?.notes||"")}</textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveLayer('${id||""}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveLayer(id){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        name:
+            document.getElementById("l_name").value.trim(),
+
+        breed:
+            document.getElementById("l_breed").value.trim(),
+
+        placement_date:
+            document.getElementById("l_date").value,
+
+        initial_heads:Number(
+            document.getElementById("l_initial").value
+        )||0,
+
+        current_heads:Number(
+            document.getElementById("l_current").value
+        )||0,
+
+        hen_price:Number(
+            document.getElementById("l_price").value
+        )||0,
+
+        notes:
+            document.getElementById("l_notes").value.trim()
+    };
+
+    let error;
+
+    if(id){
+
+        ({error}=await supabaseClient
+            .from("layer_flocks")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id));
+
+    }else{
+
+        ({error}=await supabaseClient
+            .from("layer_flocks")
+            .insert(payload));
+
+    }
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка збереження");
+
+    }
+
+    closeModal();
+
+    toast("Групу збережено");
+
+    loadLayers();
+    loadDashboard();
+}
+
+
+async function deleteLayer(id){
+
+    if(!confirm("Видалити групу курей?"))
+        return;
+
+    const {error}=await supabaseClient
+        .from("layer_flocks")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка видалення");
+
+    }
+
+    toast("Групу видалено");
+
+    loadLayers();
+    loadDashboard();
+}
+
+
+/* ============================================================
+   FEED
+============================================================ */
+
+async function loadFeed(){
+
+    const {data,error}=await supabaseClient
+        .from("feed_ingredients")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .order("name");
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка кормів");
+
+    }
+
+    document.getElementById("ingredientsTable")
+        .innerHTML=(data||[]).map(x=>`
+
+        <tr>
+
+            <td>${esc(x.name)}</td>
+
+            <td>${Number(x.price_per_kg).toFixed(2)} грн</td>
+
+            <td>
+
+                <div class="actions">
+
+                    <button
+                    style="background:#fef3c7"
+                    onclick="openIngredientModal('${x.id}')">
+                    ✏️
+                    </button>
+
+                    <button
+                    style="background:#fee2e2"
+                    onclick="deleteIngredient('${x.id}')">
+                    🗑
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        `).join("") || `
+        <tr>
+            <td colspan="3">Інгредієнтів немає</td>
+        </tr>`;
+
+
+    const {data:phases}=await supabaseClient
+        .from("feed_phases")
+        .select("*")
+        .order("day_from");
+
+    document.getElementById("feedPhasesTable")
+        .innerHTML=(phases||[]).map(p=>`
+
+        <tr>
+
+            <td>${esc(p.phase||"")}</td>
+            <td>${esc(p.name||"")}</td>
+            <td>${p.day_from}</td>
+            <td>${p.day_to}</td>
+
+        </tr>
+
+        `).join("");
+}
+
+
+async function openIngredientModal(id=null){
+
+    let row=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("feed_ingredients")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        row=data;
+    }
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування інгредієнта"
+        :"Новий інгредієнт";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="field">
+            <label>Назва</label>
+            <input id="i_name"
+                value="${escAttr(row?.name||"")}">
+        </div>
+
+        <div class="field">
+            <label>Ціна за кг</label>
+            <input id="i_price"
+                type="number"
+                step="0.01"
+                value="${row?.price_per_kg??0}">
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveIngredient('${id||""}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveIngredient(id){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        name:
+            document.getElementById("i_name").value.trim(),
+
+        price_per_kg:Number(
+            document.getElementById("i_price").value
+        )||0
+    };
+
+    if(!payload.name)
+        return toast("Вкажіть назву");
+
+    let error;
+
+    if(id){
+
+        ({error}=await supabaseClient
+            .from("feed_ingredients")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id));
+
+    }else{
+
+        ({error}=await supabaseClient
+            .from("feed_ingredients")
+            .insert(payload));
+
+    }
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка");
+
+    }
+
+    closeModal();
+
+    toast("Інгредієнт збережено");
+
+    loadFeed();
+}
+
+
+async function deleteIngredient(id){
+
+    if(!confirm("Видалити інгредієнт?"))
+        return;
+
+    const {error}=await supabaseClient
+        .from("feed_ingredients")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка видалення");
+
+    }
+
+    toast("Інгредієнт видалено");
+
+    loadFeed();
+}
+
+
+/* ============================================================
+   FINANCE
+============================================================ */
+
+async function loadFinance(){
+
+    const {data,error}=await supabaseClient
+        .from("finances")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .order("operation_date",{ascending:false});
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка фінансів");
+
+    }
+
+    let expenses=0;
+    let income=0;
+
+    (data||[]).forEach(x=>{
+
+        if(
+            x.operation_type==="income" ||
+            x.operation_type==="дохід"
+        )
+            income+=Number(x.amount)||0;
+        else
+            expenses+=Number(x.amount)||0;
+
+    });
+
+    document.getElementById("totalExpenses")
+        .textContent=expenses.toFixed(2)+" ₴";
+
+    document.getElementById("totalIncome")
+        .textContent=income.toFixed(2)+" ₴";
+
+    document.getElementById("financeResult")
+        .textContent=(income-expenses).toFixed(2)+" ₴";
+
+
+    document.getElementById("financeTable")
+        .innerHTML=(data||[]).map(x=>`
+
+        <tr>
+
+            <td>${x.operation_date}</td>
+
+            <td>
+                ${
+                    x.operation_type==="income"
+                    ?"Дохід"
+                    :"Витрата"
+                }
+            </td>
+
+            <td>${esc(x.category||"")}</td>
+
+            <td>${Number(x.amount).toFixed(2)} грн</td>
+
+            <td>${esc(x.description||"")}</td>
+
+            <td>
+
+                <div class="actions">
+
+                    <button
+                    style="background:#fef3c7"
+                    onclick="openFinanceModal('${x.id}')">
+                    ✏️
+                    </button>
+
+                    <button
+                    style="background:#fee2e2"
+                    onclick="deleteFinance('${x.id}')">
+                    🗑
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        `).join("") || `
+        <tr>
+            <td colspan="6">Операцій немає</td>
+        </tr>`;
+}
+
+
+async function openFinanceModal(id=null){
+
+    let row=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("finances")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        row=data;
+    }
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування операції"
+        :"Нова операція";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="grid2">
+
+            <div class="field">
+                <label>Тип</label>
+                <select id="f_type">
+                    <option value="cost"
+                        ${row?.operation_type==="cost"?"selected":""}>
+                        Витрата
+                    </option>
+
+                    <option value="income"
+                        ${row?.operation_type==="income"?"selected":""}>
+                        Дохід
+                    </option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Дата</label>
+                <input id="f_date"
+                    type="date"
+                    value="${row?.operation_date||today()}">
+            </div>
+
+            <div class="field">
+                <label>Категорія</label>
+                <input id="f_category"
+                    value="${escAttr(row?.category||"")}">
+            </div>
+
+            <div class="field">
+                <label>Сума</label>
+                <input id="f_amount"
+                    type="number"
+                    step="0.01"
+                    value="${row?.amount??0}">
+            </div>
+
+        </div>
+
+        <div class="field">
+            <label>Опис</label>
+            <textarea id="f_description">${esc(row?.description||"")}</textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveFinance('${id||""}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveFinance(id){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        operation_type:
+            document.getElementById("f_type").value,
+
+        operation_date:
+            document.getElementById("f_date").value,
+
+        category:
+            document.getElementById("f_category").value.trim(),
+
+        amount:Number(
+            document.getElementById("f_amount").value
+        )||0,
+
+        description:
+            document.getElementById("f_description").value.trim()
+    };
+
+    let error;
+
+    if(id){
+
+        ({error}=await supabaseClient
+            .from("finances")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id));
+
+    }else{
+
+        ({error}=await supabaseClient
+            .from("finances")
+            .insert(payload));
+
+    }
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка фінансів");
+
+    }
+
+    closeModal();
+
+    toast("Операцію збережено");
+
+    loadFinance();
+}
+
+
+async function deleteFinance(id){
+
+    if(!confirm("Видалити операцію?"))
+        return;
+
+    const {error}=await supabaseClient
+        .from("finances")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error)
+        return toast("Помилка");
+
+    toast("Операцію видалено");
+
+    loadFinance();
+}
+
+
+/* ============================================================
+   CLIENTS
+============================================================ */
+
+async function loadClients(){
+
+    const {data,error}=await supabaseClient
+        .from("clients")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .order("name");
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка клієнтів");
+
+    }
+
+    document.getElementById("clientsTable")
+        .innerHTML=(data||[]).map(x=>`
+
+        <tr>
+
+            <td>${esc(x.name)}</td>
+
+            <td>${esc(x.phone||"")}</td>
+
+            <td>${esc(x.address||"")}</td>
+
+            <td>
+
+                <div class="actions">
+
+                    <button
+                    style="background:#fef3c7"
+                    onclick="openClientModal('${x.id}')">
+                    ✏️
+                    </button>
+
+                    <button
+                    style="background:#fee2e2"
+                    onclick="deleteClient('${x.id}')">
+                    🗑
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        `).join("") || `
+        <tr>
+            <td colspan="4">Клієнтів немає</td>
+        </tr>`;
+}
+
+
+async function openClientModal(id=null){
+
+    let row=null;
+
+    if(id){
+
+        const {data}=await supabaseClient
+            .from("clients")
+            .select("*")
+            .eq("id",id)
+            .eq("user_id",currentUser.id)
+            .single();
+
+        row=data;
+    }
+
+    document.getElementById("modalTitle")
+        .textContent=id
+        ?"Редагування клієнта"
+        :"Новий клієнт";
+
+    document.getElementById("modalContent").innerHTML=`
+
+        <div class="field">
+            <label>Ім'я / назва</label>
+            <input id="c_name"
+                value="${escAttr(row?.name||"")}">
+        </div>
+
+        <div class="field">
+            <label>Телефон</label>
+            <input id="c_phone"
+                value="${escAttr(row?.phone||"")}">
+        </div>
+
+        <div class="field">
+            <label>Адреса</label>
+            <input id="c_address"
+                value="${escAttr(row?.address||"")}">
+        </div>
+
+        <div class="field">
+            <label>Примітки</label>
+            <textarea id="c_notes">${esc(row?.notes||"")}</textarea>
+        </div>
+
+        <div class="form-actions">
+
+            <button class="btn btn-secondary"
+                onclick="closeModal()">
+                Скасувати
+            </button>
+
+            <button class="btn btn-primary"
+                onclick="saveClient('${id||""}')">
+                Зберегти
+            </button>
+
+        </div>
+    `;
+
+    openModal();
+}
+
+
+async function saveClient(id){
+
+    const payload={
+
+        user_id:currentUser.id,
+
+        name:
+            document.getElementById("c_name").value.trim(),
+
+        phone:
+            document.getElementById("c_phone").value.trim(),
+
+        address:
+            document.getElementById("c_address").value.trim(),
+
+        notes:
+            document.getElementById("c_notes").value.trim()
+    };
+
+    if(!payload.name)
+        return toast("Вкажіть ім'я");
+
+    let error;
+
+    if(id){
+
+        ({error}=await supabaseClient
+            .from("clients")
+            .update(payload)
+            .eq("id",id)
+            .eq("user_id",currentUser.id));
+
+    }else{
+
+        ({error}=await supabaseClient
+            .from("clients")
+            .insert(payload));
+
+    }
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка клієнта");
+
+    }
+
+    closeModal();
+
+    toast("Клієнта збережено");
+
+    loadClients();
+}
+
+
+async function deleteClient(id){
+
+    if(!confirm("Видалити клієнта?"))
+        return;
+
+    const {error}=await supabaseClient
+        .from("clients")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error)
+        return toast("Помилка");
+
+    toast("Клієнта видалено");
+
+    loadClients();
+}
+
+
+/* ============================================================
+   REPORTS
+============================================================ */
+
+async function loadReportSelectors(){
+
+    const batches=await getBatches();
+
+    document.getElementById("reportBatch")
+        .innerHTML=batches.map(x=>`
+
+        <option value="${x.id}">
+            ${esc(x.name)}
+        </option>
+
+        `).join("");
+}
+
+
+async function generateReport(){
+
+    const id=
+        document.getElementById("reportBatch").value;
+
+    if(!id)
+        return toast("Оберіть партію");
+
+    const batch=
+        batchesCache.find(x=>x.id===id);
+
+    if(!batch)
+        return;
+
+    const s=await getBatchStats(batch);
+
+    const {data:sales}=await supabaseClient
+        .from("broiler_sales")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",id)
+        .order("sale_date");
+
+    const {data:home}=await supabaseClient
+        .from("home_uses")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",id)
+        .order("use_date");
+
+    const {data:treatments}=await supabaseClient
+        .from("broiler_treatments")
+        .select("*")
+        .eq("user_id",currentUser.id)
+        .eq("batch_id",id)
+        .order("treatment_date");
+
+    const revenue=(sales||[])
+        .reduce(
+            (sum,x)=>sum+(Number(x.revenue)||0),
+            0
+        );
+
+    const homeValue=(home||[])
+        .reduce(
+            (sum,x)=>sum+(Number(x.estimated_value)||0),
+            0
+        );
+
+    const chickCost=
+        Number(batch.initial_heads||0)*
+        Number(batch.chick_price||0);
+
+    document.getElementById("reportResult")
+        .innerHTML=`
+
+        <div class="panel">
+
+            <h2>ЗВІТ ПО ПАРТІЇ</h2>
+
+            <h3>
+                ${esc(batch.name)}
+            </h3>
+
+            <p>
+                Порода: ${esc(batch.breed||"—")}<br>
+                Посадка: ${batch.placement_date}<br>
+                Вік: ${ageDays(batch.placement_date)} днів<br>
+                Початково: ${batch.initial_heads} голів<br>
+                Зараз: ${s.heads} голів
+            </p>
+
+            <hr>
+
+            <div class="grid3">
+
+                <div class="card">
+                    <div class="card-title">
+                        Середня вага
+                    </div>
+                    <div class="card-value">
+                        ${s.weight.toFixed(0)} г
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        Загальна маса
+                    </div>
+                    <div class="card-value">
+                        ${s.mass.toFixed(1)} кг
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        FCR
+                    </div>
+                    <div class="card-value">
+                        ${s.fcr ? s.fcr.toFixed(2):"—"}
+                    </div>
+                </div>
+
+            </div>
+
+            <h3>Корм</h3>
+
+            <p>
+                Загальна витрата:
+                <strong>${s.feed.toFixed(2)} кг</strong>
+            </p>
+
+            <h3>Падіж</h3>
+
+            <p>
+                ${s.mortality} голів
+            </p>
+
+            <h3>Продажі</h3>
+
+            <p>
+                Кількість операцій:
+                ${(sales||[]).length}<br>
+
+                Виручка:
+                <strong>${revenue.toFixed(2)} грн</strong>
+            </p>
+
+            <h3>Забрано додому</h3>
+
+            <p>
+                Оціночна вартість:
+                <strong>${homeValue.toFixed(2)} грн</strong>
+            </p>
+
+            <h3>Лікування</h3>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>День</th>
+                            <th>Препарат</th>
+                            <th>Мл</th>
+                            <th>Ціна/10 мл</th>
+                            <th>Вартість</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                    ${(treatments||[]).map(t=>`
+
+                        <tr>
+
+                            <td>${t.treatment_date}</td>
+
+                            <td>${t.growing_day||"—"}</td>
+
+                            <td>${esc(t.medicine_name)}</td>
+
+                            <td>${Number(t.ml_used).toFixed(1)}</td>
+
+                            <td>${Number(t.price_per_10ml).toFixed(2)}</td>
+
+                            <td>
+                                ${(
+                                    Number(t.ml_used)/10*
+                                    Number(t.price_per_10ml)
+                                ).toFixed(2)} грн
+                            </td>
+
+                        </tr>
+
+                    `).join("")}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <hr>
+
+            <h3>Основна собівартість</h3>
+
+            <p>
+                Курчата:
+                ${chickCost.toFixed(2)} грн
+            </p>
+
+            <p>
+                Корм:
+                необхідно визначати за цінами обліку корму
+            </p>
+
+            <p>
+                Виручка:
+                <strong>${revenue.toFixed(2)} грн</strong>
+            </p>
+
+            <br>
+
+            <button class="btn btn-primary"
+                onclick="window.print()">
+                🖨 Друкувати звіт
+            </button>
+
+        </div>
+    `;
+}
+
+
+/* ============================================================
+   MODAL
+============================================================ */
+
+function openModal(){
+
+    document.getElementById("modal")
+        .classList.remove("hidden");
+}
+
+
+function closeModal(){
+
+    document.getElementById("modal")
+        .classList.add("hidden");
+}
+
+
+/* ============================================================
+   HELPERS
+============================================================ */
+
+function today(){
+
+    return new Date()
+        .toISOString()
+        .slice(0,10);
+
+}
+
+
+function esc(value){
+
+    return String(value ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+
+function escAttr(value){
+
+    return esc(value);
+}
+
+
+async function deleteDaily(id,batchId){
+
+    if(!confirm(
+        "Видалити цей щоденний запис?"
+    )) return;
+
+    const {error}=await supabaseClient
+        .from("broiler_daily")
+        .delete()
+        .eq("id",id)
+        .eq("user_id",currentUser.id);
+
+    if(error){
+
+        console.error(error);
+
+        return toast("Помилка видалення");
+
+    }
+
+    toast("Запис видалено");
+
+    openBatchDetails(batchId);
+    loadDashboard();
+}
+
+
+</script>
+
+</body>
+</html>
