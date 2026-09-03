@@ -1,0 +1,34 @@
+(()=>{'use strict';
+/* FERMA PRO warehouse synchronization hardening */
+const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+const autoMove=(prefix,id)=>C.moves.find(m=>m.user_id===user.id&&String(m.notes||'').startsWith(`${prefix}:${id}`));
+const stockFor=(itemId,excludeId=null)=>C.moves.filter(m=>m.item_id===itemId&&m.id!==excludeId).reduce((s,m)=>s+(m.movement_type==='in'||(m.movement_type==='adjustment'&&m.adjustment_direction==='in')?num(m.quantity):-num(m.quantity)),0);
+window.dailyForm=function(bid,id){
+ const x=id?C.daily.find(d=>d.id===id):null,feeds=C.items.filter(i=>i.item_type==='feed'),old=id?autoMove('AUTO_FEED',id):null;
+ openModal(`<h3>Денний облік</h3><form id="form" class="grid g3"><div class="field"><label>Дата</label><input name="record_date" type="date" value="${x?.record_date||D()}" required></div><div class="field"><label>Корм, кг</label><input name="feed_kg" type="number" min="0" step=".001" value="${num(x?.feed_kg)}"></div><div class="field"><label>Корм зі складу</label><select name="feed_item_id"><option value="">Не списувати зі складу</option>${feeds.map(i=>`<option value="${i.id}">${E(i.name)} (${E(i.unit)})</option>`).join('')}</select></div><div class="field"><label>Вода, л</label><input name="water_l" type="number" min="0" step=".001" value="${num(x?.water_l)}"></div><div class="field"><label>Вода, грн</label><input name="water_cost" type="number" min="0" step=".01" value="${num(x?.water_cost)}"></div><div class="field"><label>Ліки, грн</label><input name="medicine_cost" type="number" min="0" step=".01" value="${num(x?.medicine_cost)}"></div><div class="field"><label>Підстилка, грн</label><input name="bedding_cost" type="number" min="0" step=".01" value="${num(x?.bedding_cost)}"></div><div class="field"><label>Електрика, грн</label><input name="electricity_cost" type="number" min="0" step=".01" value="${num(x?.electricity_cost)}"></div><div class="field"><label>Праця, грн</label><input name="labor_cost" type="number" min="0" step=".01" value="${num(x?.labor_cost)}"></div><div class="field"><label>Інше, грн</label><input name="other_cost" type="number" min="0" step=".01" value="${num(x?.other_cost)}"></div><div class="field" style="grid-column:1/-1"><label>Примітка</label><textarea name="notes">${E(x?.notes||'')}</textarea></div><button class="primary">Зберегти</button></form>`);
+ if(old)$('form').feed_item_id.value=old.item_id;
+ $('form').onsubmit=async e=>{e.preventDefault();const f=e.target,p=Object.fromEntries(new FormData(f));p.batch_id=bid;['feed_kg','water_l','water_cost','medicine_cost','bedding_cost','electricity_cost','labor_cost','other_cost'].forEach(k=>p[k]=num(p[k]));const itemId=f.feed_item_id.value||null;
+  if(itemId&&p.feed_kg>0){const bal=stockFor(itemId,old?.id);if(p.feed_kg>bal)return alert(`Недостатньо корму на складі. Доступно: ${bal.toFixed(3)} кг`);}
+  let r,idNew=id;
+  if(id)r=await db.from('daily_records').update(p).eq('id',id).eq('user_id',user.id).select().single();else r=await db.from('daily_records').insert({...p,user_id:user.id}).select().single();
+  if(r.error)return alert(r.error.message);idNew=r.data.id;
+  if(old)await db.from('warehouse_movements').delete().eq('id',old.id).eq('user_id',user.id);
+  if(itemId&&p.feed_kg>0){const item=C.items.find(i=>i.id===itemId);if(item){const mr=await db.from('warehouse_movements').insert({user_id:user.id,item_id:item.id,batch_id:bid,movement_type:'use',movement_date:p.record_date,quantity:p.feed_kg,unit_price:num(item.price_per_unit),total_amount:p.feed_kg*num(item.price_per_unit),reference_id:idNew,notes:`AUTO_FEED:${idNew}`});if(mr.error){alert('Денний запис збережено, але списання зі складу не виконано: '+mr.error.message);}}
+  }
+  await load();closeModal();openBatch(bid);
+ };
+};
+window.treatForm=function(bid,id){
+ const x=id?C.treat.find(t=>t.id===id):null,old=id?autoMove('AUTO_MED',id):null;
+ openModal(`<h3>Лікування</h3><form id="form" class="grid g2"><div class="field"><label>Дата</label><input name="treatment_date" type="date" value="${x?.treatment_date||D()}" required></div><div class="field"><label>Препарат</label><select name="medicine_id"><option value="">Вручну</option>${C.meds.map(m=>`<option value="${m.id}">${E(m.name)} ${E(m.concentration||'')}</option>`).join('')}</select></div><div class="field"><label>Назва препарату</label><input name="medicine_name" required value="${E(x?.medicine_name||'')}"></div><div class="field"><label>Дозування</label><input name="dosage" value="${E(x?.dosage||'')}"></div><div class="field"><label>Птахів</label><input name="birds" type="number" min="0" value="${num(x?.birds)}"></div><div class="field"><label>Фактично використано, мл</label><input name="used_qty" type="number" min="0" step=".001" value="${num(x?.used_qty)}" required></div><div class="field"><label>Ціна за 10 мл, грн</label><input name="price_per_10ml" type="number" min="0" step=".01" value="${num(x?.price_per_unit)*10}"></div><div class="field"><label>Списати зі складу</label><select name="medicine_item_id"><option value="">Не списувати зі складу</option>${C.items.filter(i=>i.item_type==='medicine').map(i=>`<option value="${i.id}">${E(i.name)} (${E(i.unit)})</option>`).join('')}</select></div><button class="primary">Зберегти</button></form>`);
+ if(old)$('form').medicine_item_id.value=old.item_id;
+ const med=$('form').medicine_id,name=$('form').medicine_name;if(med)med.onchange=()=>{const m=C.meds.find(x=>x.id===med.value);if(m&&!name.value)name.value=m.name||''};
+ $('form').onsubmit=async e=>{e.preventDefault();const f=e.target,p=Object.fromEntries(new FormData(f));p.batch_id=bid;p.birds=num(p.birds);p.used_qty=num(p.used_qty);p.price_per_unit=num(p.price_per_10ml)/10;p.total_cost=p.used_qty*p.price_per_unit;const itemId=f.medicine_item_id.value||null;
+  if(itemId&&p.used_qty>0){const bal=stockFor(itemId,old?.id);if(p.used_qty>bal)return alert(`Недостатньо препарату на складі. Доступно: ${bal.toFixed(3)} мл`);}
+  delete p.price_per_10ml;delete p.medicine_item_id;let r,idNew=id;if(id)r=await db.from('treatments').update(p).eq('id',id).eq('user_id',user.id).select().single();else r=await db.from('treatments').insert({...p,user_id:user.id}).select().single();
+  if(r.error)return alert(r.error.message);idNew=r.data.id;if(old)await db.from('warehouse_movements').delete().eq('id',old.id).eq('user_id',user.id);
+  if(itemId&&p.used_qty>0){const item=C.items.find(i=>i.id===itemId);if(item){const mr=await db.from('warehouse_movements').insert({user_id:user.id,item_id:item.id,batch_id:bid,movement_type:'use',movement_date:p.treatment_date,quantity:p.used_qty,unit_price:p.price_per_unit,total_amount:p.total_cost,reference_id:idNew,notes:`AUTO_MED:${idNew}`});if(mr.error)alert('Лікування збережено, але списання препарату зі складу не виконано: '+mr.error.message);}}
+  await load();closeModal();openBatch(bid);
+ };
+};
+})();
