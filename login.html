@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FERMA PRO • Вхід</title>
 <style>
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111827;font:15px system-ui;color:#17202a}.box{width:min(420px,92%);background:#fff;padding:28px;border-radius:18px;box-shadow:0 20px 70px #0006}h1{margin:0 0 6px}p{color:#6b7280}.field{margin:12px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:5px}.field input{width:100%;box-sizing:border-box;padding:11px;border:1px solid #d1d5db;border-radius:9px;font:inherit}.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}button{padding:11px 15px;border:0;border-radius:9px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#166534;color:white}.secondary{background:#e5e7eb}.msg{margin-top:12px;min-height:20px;line-height:1.45}.err{color:#b91c1c}.ok{color:#166534}.muted{font-size:12px;color:#6b7280;margin-top:10px}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111827;font:16px system-ui;color:#17202a}.box{width:min(430px,92%);background:#fff;padding:28px;border-radius:18px;box-shadow:0 20px 70px #0006}h1{margin:0 0 6px}p{color:#6b7280}.field{margin:14px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}.field input{display:block;width:100%;padding:13px;border:1px solid #d1d5db;border-radius:10px;font:inherit}.row{display:flex;gap:10px;margin-top:18px}.row button{flex:1;padding:13px;border:0;border-radius:10px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#166534;color:#fff}.secondary{background:#e5e7eb;color:#111827}.row button:disabled{opacity:.55;cursor:not-allowed}.msg{margin-top:16px;min-height:24px;line-height:1.45}.err{color:#b91c1c}.ok{color:#166534}.muted{font-size:12px;color:#6b7280;margin-top:10px}
 </style>
 </head>
 <body>
@@ -17,63 +17,53 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;background:#11182
 <div class="field"><label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" required></div>
 <div class="row"><button class="primary" id="login" type="submit">Увійти</button><button class="secondary" id="signup" type="button">Реєстрація</button></div>
 </form>
-<div id="msg" class="msg">Підключення до сервера...</div>
-<div class="muted">Якщо після натискання нічого не відбувається, тут буде показана точна причина.</div>
+<div id="msg" class="msg">Готово. Введи email і пароль.</div>
+<div class="muted">Після натискання кнопки тут обов'язково з'явиться результат.</div>
 </div>
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-const SUPABASE_URL='https://axxormlcevusdjfqruib.supabase.co';
-const SUPABASE_KEY='sb_publishable_fmFGe67Hi8_nUZC8sKP5xg_piWbDfZi';
-const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+<script>
+(function(){
+'use strict';
+const URL='https://axxormlcevusdjfqruib.supabase.co';
+const KEY='sb_publishable_fmFGe67Hi8_nUZC8sKP5xg_piWbDfZi';
+const STORAGE='sb-axxormlcevusdjfqruib-auth-token';
 const $=id=>document.getElementById(id);
-const setMsg=(text,error=false)=>{$('msg').textContent=text;$('msg').className='msg '+(error?'err':'ok')};
-const go=()=>window.location.href='./ferma_v4.html';
-
-async function checkSession(){
- try{
-  const {data,error}=await db.auth.getSession();
-  if(error) throw error;
-  if(data?.session) go(); else setMsg('Готово. Введи email і пароль.');
- }catch(e){setMsg('Помилка підключення: '+(e?.message||e),true)}
+function msg(t,e){$('msg').textContent=t;$('msg').className='msg '+(e?'err':'ok')}
+function saveSession(data){
+ const s=data.session||data;
+ if(!s||!s.access_token)return false;
+ const now=Math.floor(Date.now()/1000);
+ const expiresIn=Number(s.expires_in||3600);
+ const session={access_token:s.access_token,refresh_token:s.refresh_token,expires_in:expiresIn,expires_at:s.expires_at||now+expiresIn,token_type:s.token_type||'bearer',user:s.user||null};
+ localStorage.setItem(STORAGE,JSON.stringify(session));
+ return true;
 }
-
-$('form').addEventListener('submit',async e=>{
+async function request(path,body){
+ const r=await fetch(URL+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify(body)});
+ let d={};try{d=await r.json()}catch(_){ }
+ if(!r.ok){const x=d.msg||d.message||d.error_description||d.error||('HTTP '+r.status);throw new Error(x)}
+ return d;
+}
+function go(){window.location.replace('./ferma_v4.html')}
+$('form').addEventListener('submit',async function(e){
  e.preventDefault();
- const email=$('email').value.trim();
- const password=$('password').value;
- if(!email||!password){setMsg('Введи email і пароль.',true);return}
- $('login').disabled=true;$('signup').disabled=true;$('login').textContent='Вхід...';setMsg('Перевіряю дані...');
- try{
-  const {data,error}=await db.auth.signInWithPassword({email,password});
-  if(error) throw error;
-  if(!data?.session) throw new Error('Сесію не створено. Перевір підтвердження email у Supabase.');
-  setMsg('Вхід успішний. Відкриваю FERMA PRO...');
-  setTimeout(go,100);
- }catch(e){
-  let text=e?.message||String(e);
-  if(/invalid login credentials/i.test(text)) text='Неправильний email або пароль.';
-  if(/email not confirmed/i.test(text)) text='Email ще не підтверджено. Перевір пошту та підтвердь адресу.';
-  setMsg(text,true);
- }finally{$('login').disabled=false;$('signup').disabled=false;$('login').textContent='Увійти'}
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password){msg('Введи email і пароль.',true);return}
+ $('login').disabled=true;$('signup').disabled=true;$('login').textContent='Вхід...';msg('Перевіряю email і пароль...');
+ try{const d=await request('token?grant_type=password',{email,password});if(!saveSession(d))throw new Error('Supabase не повернув сесію.');msg('Вхід успішний. Відкриваю FERMA PRO...');setTimeout(go,300)}
+ catch(e){let t=e.message||String(e);if(/invalid login credentials/i.test(t))t='Неправильний email або пароль.';if(/email not confirmed/i.test(t))t='Email ще не підтверджено. Перевір пошту.';msg(t,true)}
+ finally{$('login').disabled=false;$('signup').disabled=false;$('login').textContent='Увійти'}
 });
-
-$('signup').addEventListener('click',async()=>{
- const email=$('email').value.trim();
- const password=$('password').value;
- if(!email||!password){setMsg('Введи email і пароль для реєстрації.',true);return}
- if(password.length<6){setMsg('Пароль має містити щонайменше 6 символів.',true);return}
- $('login').disabled=true;$('signup').disabled=true;$('signup').textContent='Реєстрація...';setMsg('Створюю обліковий запис...');
- try{
-  const {data,error}=await db.auth.signUp({email,password});
-  if(error) throw error;
-  if(data?.session){setMsg('Реєстрація успішна. Відкриваю FERMA PRO...');setTimeout(go,100)}
-  else setMsg('Акаунт створено. Підтвердь email у листі, потім увійди.');
- }catch(e){setMsg(e?.message||String(e),true)}
+$('signup').addEventListener('click',async function(){
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||!password){msg('Введи email і пароль для реєстрації.',true);return}
+ if(password.length<6){msg('Пароль має містити щонайменше 6 символів.',true);return}
+ $('login').disabled=true;$('signup').disabled=true;$('signup').textContent='Реєстрація...';msg('Створюю акаунт...');
+ try{const d=await request('signup',{email,password});if(d.access_token&&saveSession(d)){msg('Реєстрація успішна.');setTimeout(go,300)}else msg('Акаунт створено. Підтвердь email у листі, потім натисни «Увійти».')}
+ catch(e){msg(e.message||String(e),true)}
  finally{$('login').disabled=false;$('signup').disabled=false;$('signup').textContent='Реєстрація'}
 });
-
-checkSession();
+try{const old=localStorage.getItem(STORAGE);if(old){const s=JSON.parse(old);if(s&&s.access_token&&Number(s.expires_at||0)>Math.floor(Date.now()/1000)+10)go()}}catch(_){localStorage.removeItem(STORAGE)}
+})();
 </script>
 </body>
 </html>
