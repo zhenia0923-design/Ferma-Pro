@@ -1,69 +1,8 @@
 <!doctype html>
 <html lang="uk">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FERMA PRO • Вхід</title>
-<style>
-*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111827;font:16px system-ui;color:#17202a}.box{width:min(430px,92%);background:#fff;padding:28px;border-radius:18px;box-shadow:0 20px 70px #0006}h1{margin:0 0 6px}p{color:#6b7280}.field{margin:14px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}.field input{display:block;width:100%;padding:13px;border:1px solid #d1d5db;border-radius:10px;font:inherit}.row{display:flex;gap:10px;margin-top:18px}.row button{flex:1;padding:13px;border:0;border-radius:10px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#166534;color:#fff}.secondary{background:#e5e7eb;color:#111827}.row button:disabled{opacity:.55;cursor:not-allowed}.msg{margin-top:16px;min-height:24px;line-height:1.45}.err{color:#b91c1c}.ok{color:#166534}.muted{font-size:12px;color:#6b7280;margin-top:10px}
-</style>
-</head>
-<body>
-<div class="box">
-<h1>🌾 FERMA PRO</h1>
-<p>Вхід до обліку ферми</p>
-<form id="form">
-<div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div>
-<div class="field"><label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" required></div>
-<div class="row"><button class="primary" id="login" type="submit">Увійти</button><button class="secondary" id="signup" type="button">Реєстрація</button></div>
-</form>
-<div id="msg" class="msg">Готово. Введи email і пароль.</div>
-<div class="muted">Після натискання кнопки тут обов'язково з'явиться результат.</div>
-</div>
-<script>
-(function(){
-'use strict';
-const URL='https://axxormlcevusdjfqruib.supabase.co';
-const KEY='sb_publishable_fmFGe67Hi8_nUZC8sKP5xg_piWbDfZi';
-const STORAGE='sb-axxormlcevusdjfqruib-auth-token';
-const $=id=>document.getElementById(id);
-function msg(t,e){$('msg').textContent=t;$('msg').className='msg '+(e?'err':'ok')}
-function saveSession(data){
- const s=data.session||data;
- if(!s||!s.access_token)return false;
- const now=Math.floor(Date.now()/1000);
- const expiresIn=Number(s.expires_in||3600);
- const session={access_token:s.access_token,refresh_token:s.refresh_token,expires_in:expiresIn,expires_at:s.expires_at||now+expiresIn,token_type:s.token_type||'bearer',user:s.user||null};
- localStorage.setItem(STORAGE,JSON.stringify(session));
- return true;
-}
-async function request(path,body){
- const r=await fetch(URL+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify(body)});
- let d={};try{d=await r.json()}catch(_){ }
- if(!r.ok){const x=d.msg||d.message||d.error_description||d.error||('HTTP '+r.status);throw new Error(x)}
- return d;
-}
-function go(){window.location.replace('./ferma_v4.html')}
-$('form').addEventListener('submit',async function(e){
- e.preventDefault();
- const email=$('email').value.trim(),password=$('password').value;
- if(!email||!password){msg('Введи email і пароль.',true);return}
- $('login').disabled=true;$('signup').disabled=true;$('login').textContent='Вхід...';msg('Перевіряю email і пароль...');
- try{const d=await request('token?grant_type=password',{email,password});if(!saveSession(d))throw new Error('Supabase не повернув сесію.');msg('Вхід успішний. Відкриваю FERMA PRO...');setTimeout(go,300)}
- catch(e){let t=e.message||String(e);if(/invalid login credentials/i.test(t))t='Неправильний email або пароль.';if(/email not confirmed/i.test(t))t='Email ще не підтверджено. Перевір пошту.';msg(t,true)}
- finally{$('login').disabled=false;$('signup').disabled=false;$('login').textContent='Увійти'}
-});
-$('signup').addEventListener('click',async function(){
- const email=$('email').value.trim(),password=$('password').value;
- if(!email||!password){msg('Введи email і пароль для реєстрації.',true);return}
- if(password.length<6){msg('Пароль має містити щонайменше 6 символів.',true);return}
- $('login').disabled=true;$('signup').disabled=true;$('signup').textContent='Реєстрація...';msg('Створюю акаунт...');
- try{const d=await request('signup',{email,password});if(d.access_token&&saveSession(d)){msg('Реєстрація успішна.');setTimeout(go,300)}else msg('Акаунт створено. Підтвердь email у листі, потім натисни «Увійти».')}
- catch(e){msg(e.message||String(e),true)}
- finally{$('login').disabled=false;$('signup').disabled=false;$('signup').textContent='Реєстрація'}
-});
-try{const old=localStorage.getItem(STORAGE);if(old){const s=JSON.parse(old);if(s&&s.access_token&&Number(s.expires_at||0)>Math.floor(Date.now()/1000)+10)go()}}catch(_){localStorage.removeItem(STORAGE)}
-})();
-</script>
-</body>
-</html>
+<style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111827;font:16px system-ui;color:#17202a}.box{width:min(430px,92%);background:#fff;padding:28px;border-radius:18px;box-shadow:0 20px 70px #0006}h1{margin:0 0 6px}p{color:#6b7280}.field{margin:14px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}.field input{display:block;width:100%;padding:13px;border:1px solid #d1d5db;border-radius:10px;font:inherit}.row{display:flex;gap:10px;margin-top:18px}.row button{flex:1;padding:13px;border:0;border-radius:10px;font:inherit;font-weight:800;cursor:pointer}.primary{background:#166534;color:#fff}.secondary{background:#e5e7eb;color:#111827}.row button:disabled{opacity:.55;cursor:not-allowed}.msg{margin-top:16px;min-height:24px;line-height:1.45}.err{color:#b91c1c}.ok{color:#166534}.muted{font-size:12px;color:#6b7280;margin-top:10px}</style>
+</head><body><div class="box"><h1>🌾 FERMA PRO</h1><p>Вхід до обліку ферми</p><form id="form"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username" required></div><div class="field"><label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password" required></div><div class="row"><button class="primary" id="login" type="submit">Увійти</button><button class="secondary" id="signup" type="button">Реєстрація</button></div></form><div id="msg" class="msg">Готово. Введи email і пароль.</div><div class="muted">FERMA PRO використовує нову Supabase хмару.</div></div>
+<script>(function(){'use strict';const URL='https://zfqekerozvjrpauqiqln.supabase.co',KEY='sb_publishable_HO1JIwKs8dkUNtKu7UuZUg_KGCjUsVp',STORAGE='sb-zfqekerozvjrpauqiqln-auth-token',$=id=>document.getElementById(id);function msg(t,e){$('msg').textContent=t;$('msg').className='msg '+(e?'err':'ok')}function save(d){const s=d.session||d;if(!s?.access_token)return false;const now=Math.floor(Date.now()/1000),x={access_token:s.access_token,refresh_token:s.refresh_token,expires_in:Number(s.expires_in||3600),expires_at:s.expires_at||now+Number(s.expires_in||3600),token_type:s.token_type||'bearer',user:s.user||null};localStorage.setItem(STORAGE,JSON.stringify(x));return true}async function request(path,body){const r=await fetch(URL+'/auth/v1/'+path,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify(body)});let d={};try{d=await r.json()}catch(_){}if(!r.ok)throw new Error(d.msg||d.message||d.error_description||d.error||('HTTP '+r.status));return d}function go(){location.replace('./ferma_v4.html')}$('form').onsubmit=async e=>{e.preventDefault();const email=$('email').value.trim(),password=$('password').value;if(!email||!password)return msg('Введи email і пароль.',true);$('login').disabled=$('signup').disabled=true;$('login').textContent='Вхід...';try{const d=await request('token?grant_type=password',{email,password});if(!save(d))throw Error('Supabase не повернув сесію.');msg('Вхід успішний.');setTimeout(go,250)}catch(e){let t=e.message;if(/invalid login credentials/i.test(t))t='Неправильний email або пароль.';if(/email not confirmed/i.test(t))t='Email ще не підтверджено.';msg(t,true)}finally{$('login').disabled=$('signup').disabled=false;$('login').textContent='Увійти'}};$('signup').onclick=async()=>{const email=$('email').value.trim(),password=$('password').value;if(!email||!password)return msg('Введи email і пароль для реєстрації.',true);if(password.length<6)return msg('Пароль має містити щонайменше 6 символів.',true);$('login').disabled=$('signup').disabled=true;$('signup').textContent='Реєстрація...';try{const d=await request('signup',{email,password});if(d.access_token&&save(d)){msg('Реєстрація успішна.');setTimeout(go,250)}else msg('Акаунт створено. Підтвердь email у листі, потім увійди.')}catch(e){msg(e.message,true)}finally{$('login').disabled=$('signup').disabled=false;$('signup').textContent='Реєстрація'}};try{const s=JSON.parse(localStorage.getItem(STORAGE)||'null');if(s?.access_token&&Number(s.expires_at||0)>Math.floor(Date.now()/1000)+10)go()}catch(_){localStorage.removeItem(STORAGE)}})();</script></body></html>
