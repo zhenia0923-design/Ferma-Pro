@@ -5,7 +5,7 @@ window.eggAccounting20=function(id){
  const produced=n20(window.eggProduced(id)),sold=n20(window.eggSold(id));
  const sales=C.eggSales.filter(x=>x.batch_id===id);
  const salesAmount=sales.reduce((s,x)=>s+n20(x.total_amount),0);
- const calculated=sales.reduce((s,x)=>s+n20(x.quantity)*n20(x.price_per_egg),0);
+ const calculatedSalesAmount=sales.reduce((s,x)=>s+n20(x.quantity)*n20(x.price_per_egg),0);
  const feed=n20(window.feedKg(id)),feedCost=n20(window.feedCost(id));
  return {produced,sold,available:Math.max(0,produced-sold),salesAmount,calculatedSalesAmount,feedKg:feed,feedCost,feedPer100Eggs:produced>0?feed/produced*100:0,feedCostPerEgg:produced>0?feedCost/produced:0};
 };
