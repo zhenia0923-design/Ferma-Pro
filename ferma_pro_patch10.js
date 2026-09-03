@@ -1,0 +1,24 @@
+(()=>{'use strict';
+/* FERMA PRO: treatment cost, medicine units and warehouse synchronization hardening */
+const n10=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
+const autoMed10=(id)=>C.moves.find(m=>m.user_id===user.id&&m.movement_type==='use'&&String(m.notes||'')===`AUTO_MED:${id}`);
+const stock10=(itemId,excludeId=null)=>C.moves.filter(m=>m.item_id===itemId&&m.id!==excludeId).reduce((s,m)=>{const q=n10(m.quantity);if(m.movement_type==='in')return s+q;if(m.movement_type==='adjustment')return s+(m.adjustment_direction==='in'?q:-q);return s-q},0);
+window.treatForm=function(bid,id){
+ const x=id?C.treat.find(t=>t.id===id):null,old=id?autoMed10(id):null,items=C.items.filter(i=>i.item_type==='medicine');
+ openModal(`<h3>${x?'Редагування':'Додати'} лікування</h3><form id="form" class="grid g2"><div class="field"><label>Дата</label><input name="treatment_date" type="date" value="${x?.treatment_date||D()}" required></div><div class="field"><label>Препарат</label><select name="medicine_id" id="medicineSelect"><option value="">Вручну</option>${C.meds.map(m=>`<option value="${m.id}" ${x?.medicine_id===m.id?'selected':''}>${E(m.name)} ${E(m.concentration||'')}</option>`).join('')}</select></div><div class="field"><label>Назва препарату</label><input name="medicine_name" id="medicineName" required value="${E(x?.medicine_name||'')}"></div><div class="field"><label>Дозування</label><input name="dosage" value="${E(x?.dosage||'')}"></div><div class="field"><label>Птахів</label><input name="birds" type="number" min="0" step="1" value="${n10(x?.birds)}"></div><div class="field"><label>Фактично використано, мл</label><input name="used_qty" id="usedQty" type="number" min="0" step=".001" value="${n10(x?.used_qty)}" required></div><div class="field"><label>Ціна за 10 мл, грн</label><input name="price_per_10ml" id="price10" type="number" min="0" step=".01" value="${n10(x?.price_per_unit)*10}"></div><div class="field"><label>Списати зі складу</label><select name="medicine_item_id" id="medicineItem"><option value="">Не списувати зі складу</option>${items.map(i=>`<option value="${i.id}" ${old?.item_id===i.id?'selected':''}>${E(i.name)}${i.concentration?' '+E(i.concentration):''} (${E(i.unit)})</option>`).join('')}</select></div><div class="field" style="grid-column:1/-1"><small id="medicineHint"></small></div><button class="primary">Зберегти</button></form>`);
+ const med=$('medicineSelect'),name=$('medicineName'),price=$('price10'),itemSel=$('medicineItem'),hint=$('medicineHint');
+ const sync=()=>{const m=C.meds.find(z=>z.id===med.value);if(m){if(!name.value||name.dataset.auto==='1')name.value=m.name||'';name.dataset.auto='1';if(n10(m.price)>0&&!n10(price.value))price.value=n10(m.package_ml)>0?(n10(m.price)/n10(m.package_ml))*10:n10(m.price);const wi=items.find(i=>i.name===m.name||i.name.includes(m.name)||m.name.includes(i.name));if(wi&&!itemSel.value)itemSel.value=wi.id}if(itemSel.value){const wi=items.find(i=>i.id===itemSel.value);if(wi)hint.textContent=`На складі: ${stock10(wi.id,old?.id).toFixed(3)} ${wi.unit||'од.'}`}else hint.textContent=''};
+ med.onchange=sync;name.oninput=()=>{name.dataset.auto='0'};itemSel.onchange=sync;sync();
+ $('form').onsubmit=async e=>{e.preventDefault();const f=e.target,p=Object.fromEntries(new FormData(f));p.batch_id=bid;p.birds=Math.max(0,Math.round(n10(p.birds)));p.used_qty=Math.max(0,n10(p.used_qty));p.price_per_unit=Math.max(0,n10(p.price_per_10ml)/10);p.total_cost=p.used_qty*p.price_per_unit;p.unit='ml';const itemId=f.medicine_item_id.value||null;
+  if(!p.medicine_name.trim())return alert('Вкажіть назву препарату.');
+  if(p.used_qty<=0)return alert('Вкажіть фактичну кількість використаного препарату в мл.');
+  if(itemId){const bal=stock10(itemId,old?.id);if(p.used_qty>bal+1e-9)return alert(`Недостатньо препарату на складі. Доступно: ${bal.toFixed(3)} мл`)}
+  delete p.price_per_10ml;delete p.medicine_item_id;
+  let r;if(id)r=await db.from('treatments').update(p).eq('id',id).eq('user_id',user.id).select().single();else r=await db.from('treatments').insert({...p,user_id:user.id}).select().single();
+  if(r.error)return alert(r.error.message);const idNew=r.data.id;
+  if(old){const dr=await db.from('warehouse_movements').delete().eq('id',old.id).eq('user_id',user.id);if(dr.error)return alert('Лікування збережено, але старе списання препарату не видалено: '+dr.error.message)}
+  if(itemId){const item=C.items.find(i=>i.id===itemId);if(item){const mr=await db.from('warehouse_movements').insert({user_id:user.id,item_id:item.id,batch_id:bid,movement_type:'use',movement_date:p.treatment_date,quantity:p.used_qty,unit_price:p.price_per_unit,total_amount:p.total_cost,reference_id:idNew,notes:`AUTO_MED:${idNew}`});if(mr.error)return alert('Лікування збережено, але списання препарату зі складу не виконано: '+mr.error.message)}}
+  await load();closeModal();openBatch(bid);
+ };
+};
+})();
