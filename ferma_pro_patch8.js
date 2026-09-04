@@ -1,17 +1,49 @@
 (()=>{'use strict';
-/* FERMA PRO: warehouse + multi-ingredient recipes + feed cost hardening */
+/* FERMA PRO v35: warehouse + multi-ingredient recipes, corrected save flow */
 const n8=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
 const esc8=v=>E(v??'');
 window.warehouseBalance=function(itemId,excludeId){return C.moves.filter(m=>m.item_id===itemId&&m.id!==excludeId).reduce((s,m)=>{const q=n8(m.quantity);if(m.movement_type==='in')return s+q;if(m.movement_type==='adjustment')return s+(m.adjustment_direction==='in'?q:-q);return s-q},0)};
-window.feedCost=function(id){return C.moves.filter(m=>m.batch_id===id&&m.movement_type==='use'&&C.items.some(i=>i.id===m.item_id&&i.item_type==='feed')).reduce((s,m)=>s+(n8(m.total_amount)||n8(m.quantity)*n8(m.unit_price)),0)};
+window.feedCost=function(id){return C.moves.filter(m=>m.batch_id===id&&m.movement_type==='use'&&C.items.some(i=>i.id===m.item_id&&i.item_type==='feed')).reduce((s,m)=>s+(n8(m.total_amount)>0?n8(m.total_amount):n8(m.quantity)*n8(m.unit_price)),0)};
 window.recipeStats=function(recipeId){const lines=C.lines.filter(x=>x.recipe_id===recipeId);const total=lines.reduce((s,x)=>s+n8(x.kg),0);const cost=lines.reduce((s,x)=>s+n8(x.kg)*n8(x.price_per_kg),0);return {lines,total,cost,costKg:total>0?cost/total:0}};
-window.recipeForm=async function(id){const r=id?C.recipes.find(x=>x.id===id):null;let lines=r?C.lines.filter(x=>x.recipe_id===id):[];const feeds=C.items.filter(i=>i.item_type==='feed');if(!feeds.length)return alert('Спочатку додайте інгредієнти/корм на склад.');
- const lineHtml=(x={})=>`<tr class="recipe-line"><td><select class="ri" required>${feeds.map(i=>`<option value="${i.id}" data-name="${esc8(i.name)}" data-price="${n8(i.price_per_unit)}" ${i.id===x.item_id?'selected':''}>${esc8(i.name)}</option>`).join('')}</select></td><td><input class="rkg" type="number" min="0.001" step="0.001" value="${n8(x.kg)||''}" required></td><td><input class="rp" type="number" min="0" step="0.0001" value="${n8(x.price_per_kg)}" required></td><td><input class="rprot" type="number" min="0" step="0.01" value="${n8(x.protein_pct)||''}"></td><td class="rlinecost">0.00</td><td><button type="button" class="danger small rdel">×</button></td></tr>`;
+window.recipeForm=async function(id){
+ const r=id?C.recipes.find(x=>x.id===id):null;
+ const lines=r?C.lines.filter(x=>x.recipe_id===id):[];
+ const feeds=C.items.filter(i=>i.item_type==='feed');
+ if(!feeds.length)return alert('Спочатку додайте інгредієнти/корм на склад.');
+ const lineHtml=(x={})=>`<tr class="recipe-line"><td><select class="ri" required>${feeds.map(i=>`<option value="${i.id}" data-name="${esc8(i.name)}" data-price="${n8(i.price_per_unit)}" ${i.id===x.item_id?'selected':''}>${esc8(i.name)}</option>`).join('')}</select></td><td><input class="rkg" type="number" min="0.001" step="0.001" value="${n8(x.kg)||''}" required></td><td><input class="rp" type="number" min="0" step="0.0001" value="${n8(x.price_per_kg)||''}" required></td><td><input class="rprot" type="number" min="0" step="0.01" value="${n8(x.protein_pct)||''}"></td><td class="rlinecost">0.00</td><td><button type="button" class="danger small rdel">×</button></td></tr>`;
  openModal(`<h3>${r?'Редагувати':'Новий'} рецепт корму</h3><form id="form"><div class="grid g2"><div class="field"><label>Назва</label><input name="name" value="${esc8(r?.name||'')}" required></div><div class="field"><label>Фаза</label><input name="phase" value="${esc8(r?.phase||'')}" placeholder="Starter / Grower / Finisher"></div><div class="field" style="grid-column:1/-1"><label>Примітка</label><input name="notes" value="${esc8(r?.notes||'')}"></div></div><div class="row" style="margin:12px 0"><b>Склад рецепта</b><button type="button" class="secondary" id="addLine">＋ Інгредієнт</button></div><div style="overflow:auto"><table class="table"><thead><tr><th>Інгредієнт</th><th>кг</th><th>грн/кг</th><th>Білок %</th><th>Вартість</th><th></th></tr></thead><tbody id="recipeLines">${lines.map(lineHtml).join('')||lineHtml()}</tbody></table></div><div class="card" style="margin-top:12px"><b>Всього:</b> <span id="rTotal">0.000 кг</span> · <b>Собівартість:</b> <span id="rCost">0.00 грн</span> · <b>1 кг:</b> <span id="rKgCost">0.00 грн</span></div><button class="primary" style="margin-top:12px">Зберегти рецепт</button></form>`);
- const tbody=$('recipeLines');const recalc=()=>{let kg=0,c=0;tbody.querySelectorAll('.recipe-line').forEach(tr=>{const q=n8(tr.querySelector('.rkg').value),p=n8(tr.querySelector('.rp').value);kg+=q;c+=q*p;tr.querySelector('.rlinecost').textContent=(q*p).toFixed(2)});$('rTotal').textContent=kg.toFixed(3)+' кг';$('rCost').textContent=c.toFixed(2)+' грн';$('rKgCost').textContent=(kg?c/kg:0).toFixed(2)+' грн'};
- tbody.querySelectorAll('.ri').forEach(s=>s.onchange=()=>{const o=s.options[s.selectedIndex];const p=s.closest('tr').querySelector('.rp');if(!p.value)p.value=n8(o.dataset.price).toFixed(4);recalc()});tbody.addEventListener('input',recalc);tbody.addEventListener('click',e=>{if(e.target.classList.contains('rdel')){if(tbody.querySelectorAll('.recipe-line').length>1)e.target.closest('tr').remove();recalc()}});$('addLine').onclick=()=>{tbody.insertAdjacentHTML('beforeend',lineHtml());recalc()};recalc();
- $('form').onsubmit=async e=>{e.preventDefault();const p=Object.fromEntries(new FormData(e.target));p.name=String(p.name||'').trim();if(!p.name)return alert('Вкажіть назву рецепта.');const rows=[...tbody.querySelectorAll('.recipe-line')].map(tr=>{const s=tr.querySelector('.ri');const o=s.options[s.selectedIndex];return {item_id:s.value,ingredient_name:o?.dataset.name||o?.textContent||'',kg:n8(tr.querySelector('.rkg').value),price_per_kg:n8(tr.querySelector('.rp').value),protein_pct:n8(tr.querySelector('.rprot').value)}).filter(x=>x.kg>0);if(!rows.length)return alert('Додайте хоча б один інгредієнт.');const sum=rows.reduce((s,x)=>s+x.kg,0);if(sum<=0)return alert('Загальна маса рецепта повинна бути більше 0.');if(!(await save('feed_recipes',p,id)))return;const rid=id||C.recipes.find(x=>x.name===p.name)?.id;if(!rid)return alert('Рецепт збережено, але не вдалося отримати його ID.');if(id){const dr=await db.from('feed_recipe_lines').delete().eq('recipe_id',id).eq('user_id',user.id);if(dr.error)return alert(dr.error.message)}const ins=await db.from('feed_recipe_lines').insert(rows.map(x=>({...x,recipe_id:rid,user_id:user.id})));if(ins.error)return alert(ins.error.message);closeModal();load()};
+ const tbody=$('recipeLines');
+ const recalc=()=>{let kg=0,c=0;tbody.querySelectorAll('.recipe-line').forEach(tr=>{const q=n8(tr.querySelector('.rkg').value),p=n8(tr.querySelector('.rp').value);kg+=q;c+=q*p;tr.querySelector('.rlinecost').textContent=(q*p).toFixed(2)});$('rTotal').textContent=kg.toFixed(3)+' кг';$('rCost').textContent=c.toFixed(2)+' грн';$('rKgCost').textContent=(kg?c/kg:0).toFixed(2)+' грн'};
+ tbody.querySelectorAll('.ri').forEach(s=>s.onchange=()=>{const o=s.options[s.selectedIndex],p=s.closest('tr').querySelector('.rp');if(!p.value)p.value=n8(o.dataset.price).toFixed(4);recalc()});
+ tbody.addEventListener('input',recalc);
+ tbody.addEventListener('click',e=>{if(e.target.classList.contains('rdel')){if(tbody.querySelectorAll('.recipe-line').length>1)e.target.closest('.recipe-line').remove();recalc()}});
+ $('addLine').onclick=()=>{tbody.insertAdjacentHTML('beforeend',lineHtml());const row=tbody.lastElementChild;const s=row.querySelector('.ri');s.onchange=()=>{const o=s.options[s.selectedIndex],p=row.querySelector('.rp');if(!p.value)p.value=n8(o.dataset.price).toFixed(4);recalc()};recalc()};
+ recalc();
+ $('form').onsubmit=async e=>{
+   e.preventDefault();
+   const form=e.target;
+   const p={name:String(form.name.value||'').trim(),phase:String(form.phase.value||'').trim(),notes:String(form.notes.value||'').trim()||null};
+   if(!p.name)return alert('Вкажіть назву рецепта.');
+   const rows=[...tbody.querySelectorAll('.recipe-line')].map(tr=>{const s=tr.querySelector('.ri'),o=s.options[s.selectedIndex];return {item_id:s.value,ingredient_name:o?.dataset.name||o?.textContent||'',kg:n8(tr.querySelector('.rkg').value),price_per_kg:n8(tr.querySelector('.rp').value),protein_pct:n8(tr.querySelector('.rprot').value)}}).filter(x=>x.item_id&&x.kg>0);
+   if(!rows.length)return alert('Додайте хоча б один інгредієнт.');
+   try{
+     let recipeId=id;
+     if(id){
+       const up=await db.from('feed_recipes').update(p).eq('id',id).eq('user_id',user.id).select('id').single();
+       if(up.error)throw new Error(up.error.message);
+       recipeId=up.data.id;
+       const dr=await db.from('feed_recipe_lines').delete().eq('recipe_id',recipeId).eq('user_id',user.id);
+       if(dr.error)throw new Error(dr.error.message);
+     }else{
+       const ins=await db.from('feed_recipes').insert({...p,user_id:user.id}).select('id').single();
+       if(ins.error)throw new Error(ins.error.message);
+       recipeId=ins.data.id;
+     }
+     const li=await db.from('feed_recipe_lines').insert(rows.map(x=>({...x,recipe_id:recipeId,user_id:user.id})));
+     if(li.error)throw new Error(li.error.message);
+     await load();closeModal();alert('Рецепт збережено.');
+   }catch(err){alert('Не вдалося зберегти рецепт: '+(err?.message||err));}
+ };
 };
 window.recipes=function(){const rs=C.recipes.map(r=>{const s=recipeStats(r.id);return `<tr><td><b>${esc8(r.name)}</b></td><td>${esc8(r.phase||'')}</td><td>${s.total.toFixed(3)} кг</td><td>${s.cost.toFixed(2)} грн</td><td><b>${s.costKg.toFixed(2)} грн/кг</b></td><td>${s.lines.length}</td><td><button class="secondary small" onclick="recipeForm('${r.id}')">Ред.</button> <button class="danger small" onclick="del('feed_recipes','${r.id}')">×</button></td></tr>`}).join('');$('content').innerHTML=`<div class="row"><button class="primary" onclick="recipeForm()">＋ Новий рецепт</button><button class="secondary" onclick="load()">↻ Оновити</button></div><div class="card section"><h3>Рецепти корму</h3><p class="muted">Собівартість розраховується з усіх інгредієнтів рецепта.</p><div style="overflow:auto"><table class="table"><thead><tr><th>Рецепт</th><th>Фаза</th><th>Маса</th><th>Вартість</th><th>Собівартість/кг</th><th>Інгредієнтів</th><th></th></tr></thead><tbody>${rs||'<tr><td colspan="7">Рецептів немає.</td></tr>'}</tbody></table></div></div><div class="card section"><h3>Фази та рекомендований корм</h3><div style="overflow:auto"><table class="table"><thead><tr><th>Вид</th><th>Фаза</th><th>Дні</th><th>Рекомендована вага</th><th>Корм г/гол/день</th><th>Примітка</th></tr></thead><tbody>${C.phases.map(p=>`<tr><td>${esc8(p.kind)}</td><td>${esc8(p.name)}</td><td>${n8(p.from_day)}–${n8(p.to_day)}</td><td>${n8(p.recommended_weight_g).toFixed(0)} г</td><td>${n8(p.recommended_feed_g_head).toFixed(1)} г</td><td>${esc8(p.notes||'')}</td></tr>`).join('')||'<tr><td colspan="6">Фази не задані.</td></tr>'}</tbody></table></div></div>`};
-window.feedPhaseFor=window.phaseFor;window.phaseFor=function(b){const p=window.feedPhaseFor?window.feedPhaseFor(b):null;return p};
 })();
