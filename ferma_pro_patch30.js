@@ -1,0 +1,24 @@
+(()=>{'use strict';
+/* FERMA PRO v30: report accounting consistency */
+const n30=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
+const money30=v=>n30(v).toLocaleString('uk-UA',{minimumFractionDigits:2,maximumFractionDigits:2})+' грн';
+const weight30=(id,types)=>C.events.filter(e=>e.batch_id===id&&types.includes(e.event_type)).reduce((s,e)=>s+Math.max(0,n30(e.weight_kg)),0);
+window.reportAccounting30=function(id){
+ const b=batch(id),w=latestWeight(id),h=n30(heads(b));
+ const live=w?h*n30(w.average_weight_g)/1000:0;
+ const sold=weight30(id,['sale']),home=weight30(id,['home']),cull=weight30(id,['cull']);
+ const output=live+sold+home+cull;
+ const cost=n30(totalCost(id)),inc=n30(income(id));
+ return {heads:h,initialHeads:n30(b?.initial_heads),liveKg:live,soldKg:sold,homeKg:home,cullKg:cull,outputKg:output,cost,income:inc,result:inc-cost,costPerOutputKg:output>0?cost/output:0};
+};
+/* Replace the previous report with consistent production mass and cost/kg figures. */
+const oldBatchReport30=window.batchReport23;
+window.batchReport23=function(id){
+ const b=batch(id);if(!b)return alert('Партію не знайдено.');
+ const d=reportAccounting30(id);
+ if(b.kind!=='broiler')return oldBatchReport30(id);
+ const w=latestWeight(id);
+ const html=`<section class="fp30"><div class="head30"><h1>FERMA PRO</h1><h2>ВИРОБНИЧИЙ ЗВІТ • БРОЙЛЕРИ</h2><p>Партія: <b>${E(b.name)}</b> · Порода: ${E(b.breed||'—')} · Посадка: ${b.placed_at} · Вік: ${age(b)}</p></div><div class="grid30"><div><b>Поголів'я</b><br>Початкове: ${d.initialHeads} гол.<br>Зараз: ${d.heads} гол.</div><div><b>Жива маса</b><br>${d.liveKg.toFixed(2)} кг</div><div><b>Вироблено маси</b><br>${d.outputKg.toFixed(2)} кг</div><div><b>FCR</b><br>${fcr(id)>0?fcr(id).toFixed(3):'—'}</div></div><h3>1. Виробничі показники</h3><table><tbody><tr><td>Остання середня вага</td><td class="num30">${w?n30(w.average_weight_g).toFixed(0)+' г':'—'}</td></tr><tr><td>Корм використано</td><td class="num30">${n30(feedKg(id)).toFixed(2)} кг</td></tr><tr><td>Продано</td><td class="num30">${d.soldKg.toFixed(2)} кг</td></tr><tr><td>Вилучено додому</td><td class="num30">${d.homeKg.toFixed(2)} кг</td></tr><tr><td>Вибракувано</td><td class="num30">${d.cullKg.toFixed(2)} кг</td></tr><tr><td><b>Вироблена/реалізована маса для собівартості</b></td><td class="num30"><b>${d.outputKg.toFixed(2)} кг</b></td></tr></tbody></table><h3>2. Собівартість</h3><table><tbody><tr><td>Курчата / посадка</td><td class="num30">${money30(n30(b.initial_heads)*n30(b.chick_price))}</td></tr><tr><td>Корм</td><td class="num30">${money30(feedCost(id))}</td></tr><tr><td>Щоденні витрати</td><td class="num30">${money30(typeof dailyNonMedicineCost17==='function'?dailyNonMedicineCost17(id):dailyCost(id))}</td></tr><tr><td>Лікування</td><td class="num30">${money30(typeof treatmentCost17==='function'?treatmentCost17(id):treatmentCost(id))}</td></tr><tr><td>Інші витрати</td><td class="num30">${money30(explicitExpense(id))}</td></tr><tr><td><b>РАЗОМ</b></td><td class="num30"><b>${money30(d.cost)}</b></td></tr></tbody></table><h3>3. Фінансовий результат</h3><table><tbody><tr><td>Дохід</td><td class="num30">${money30(d.income)}</td></tr><tr><td>Собівартість</td><td class="num30">${money30(d.cost)}</td></tr><tr><td><b>Результат</b></td><td class="num30"><b>${money30(d.result)}</b></td></tr><tr><td>Собівартість 1 кг виробленої маси</td><td class="num30">${d.costPerOutputKg>0?money30(d.costPerOutputKg):'—'}</td></tr></tbody></table><p class="note30">Собівартість 1 кг розрахована за всією продуктивною масою: залишок живої маси + продаж + вилучення додому + вибракування. Загибель не є продукцією.</p></section><style>@media print{.fp30{page-break-after:auto}.noPrint{display:none!important}}.fp30{font-family:Arial,sans-serif;max-width:900px;margin:0 auto;padding:28px;background:#fff;color:#111}.fp30 h1{margin:0;font-size:24px}.fp30 h2{margin:4px 0 14px;font-size:17px}.fp30 h3{margin:22px 0 8px;border-bottom:1px solid #999;padding-bottom:4px}.fp30 table{width:100%;border-collapse:collapse}.fp30 th,.fp30 td{border:1px solid #bbb;padding:7px;text-align:left}.fp30 .num30{text-align:right;white-space:nowrap}.fp30 .grid30{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:18px 0}.fp30 .grid30>div{border:1px solid #bbb;padding:10px}.fp30 .note30{font-size:11px;color:#555;margin-top:20px}@media(max-width:700px){.fp30 .grid30{grid-template-columns:repeat(2,1fr)}}@media print{.fp30{max-width:none;padding:0}.fp30 .grid30{grid-template-columns:repeat(4,1fr)}}</style>`;
+ const old=document.body.innerHTML;document.body.innerHTML=`<div class="noPrint" style="padding:10px;text-align:center"><button onclick="location.reload()">← Назад</button> <button onclick="window.print()">🖨️ Друк / PDF</button></div>${html}`;window.print();setTimeout(()=>{document.body.innerHTML=old},300);
+};
+})();
