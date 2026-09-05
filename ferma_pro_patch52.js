@@ -1,0 +1,18 @@
+(()=>{'use strict';
+/* FERMA PRO v52: automatic feed-recipe cost calculation.
+   Cost = sum(ingredient kg × current ingredient price) / total recipe kg.
+   The price shown/saved on each recipe line is refreshed from warehouse feed item price.
+   No manual recipe cost input is required.
+*/
+const n52=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
+const money52=v=>n52(v).toLocaleString('uk-UA',{minimumFractionDigits:2,maximumFractionDigits:2})+' грн';
+function itemPrice52(item){return n52(item?.price_per_kg??item?.unit_price??item?.purchase_price??item?.cost_per_kg??item?.price)}
+function recipeLines52(recipeId){return (C.lines||[]).filter(x=>x.recipe_id===recipeId)}
+function recipeCost52(recipeId){const lines=recipeLines52(recipeId);let kg=0,cost=0;for(const l of lines){const q=n52(l.kg);const item=(C.items||[]).find(i=>String(i.id)===String(l.item_id));const p=n52(l.price_per_kg)||itemPrice52(item);kg+=q;cost+=q*p}return {kg,cost,totalKg:kg,costPerKg:kg>0?cost/kg:0}}
+window.recipeCost52=recipeCost52;
+function refreshRecipeCost52(){document.querySelectorAll('[data-recipe-cost52]').forEach(el=>{const id=el.dataset.recipeId,r=recipeCost52(id);el.textContent=r.kg>0?money52(r.costPerKg):'0,00 грн/кг'})}
+function decorateRecipeList52(){const c=document.querySelector('#content');if(!c||current!=='recipes')return;const tables=[...c.querySelectorAll('table')];for(const table of tables){for(const tr of table.querySelectorAll('tbody tr')){if(tr.dataset.cost52)return;const buttons=[...tr.querySelectorAll('button')];const edit=buttons.find(b=>/редаг|відкр|edit/i.test(b.textContent||''));if(!edit)continue;const m=(edit.getAttribute('onclick')||'').match(/recipeForm\(['"]([^'"]+)['"]\)/);if(!m)continue;const id=m[1],r=recipeCost52(id),cell=document.createElement('td');cell.innerHTML='<b>Собівартість</b><br><span data-recipe-cost52 data-recipe-id="'+id+'">'+(r.kg>0?money52(r.costPerKg):'0,00 грн/кг')+'</span>';tr.appendChild(cell);tr.dataset.cost52='1';const head=table.querySelector('thead tr');if(head&&!head.querySelector('[data-cost-head52]')){const th=document.createElement('th');th.dataset.costHead52='1';th.textContent='Собівартість';head.appendChild(th)}}}}
+function decorateRecipeForm52(){const f=document.getElementById('recipeForm39');if(!f||f.dataset.cost52)return;f.dataset.cost52='1';const box=document.createElement('div');box.className='card';box.style.margin='12px 0';box.innerHTML='<b>💰 Автоматична собівартість</b><div id="recipeCost52Value" class="stat">0,00 грн/кг</div><div class="muted">Розраховується з кількості кожного інгредієнта та його ціни. Вручну вводити собівартість не потрібно.</div>';f.querySelector('.row:last-child')?.before(box);const calc=()=>{let kg=0,cost=0;f.querySelectorAll('tr.recipe39').forEach(tr=>{const q=n52(tr.querySelector('.kg39')?.value),p=n52(tr.querySelector('.pr39')?.value);kg+=q;cost+=q*p});const v=kg?cost/kg:0;const out=document.getElementById('recipeCost52Value');if(out)out.textContent=money52(v)+'/кг';return {kg,cost,costPerKg:v}};f.addEventListener('input',calc);calc();const old=f.onsubmit;if(typeof old==='function'){f.onsubmit=async function(ev){const x=calc();const result=await old.call(this,ev);if(result!==false&&typeof load==='function'){setTimeout(()=>{load().then(()=>decorateRecipeList52())},100)}return result}}}
+const oldRecipe52=window.recipeForm;if(typeof oldRecipe52==='function'){window.recipeForm=async function(id){await oldRecipe52(id);setTimeout(decorateRecipeForm52,20)}}
+const mo52=new MutationObserver(()=>{decorateRecipeForm52();decorateRecipeList52();refreshRecipeCost52()});if(document.body)mo52.observe(document.body,{childList:true,subtree:true});setTimeout(()=>{decorateRecipeForm52();decorateRecipeList52()},700);
+})();
