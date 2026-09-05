@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FERMA PRO • Новий пароль</title>
+<style>
+html,body{margin:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f7fb;color:#172033}
+body{display:grid;place-items:center;padding:20px;box-sizing:border-box}
+.card{width:min(440px,100%);background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.06);box-sizing:border-box}
+h1{font-size:22px;margin:0 0 8px}.sub{color:#667085;font-size:14px;margin-bottom:18px}label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}input{width:100%;box-sizing:border-box;padding:12px;border:1px solid #d0d5dd;border-radius:10px;font-size:16px}button{width:100%;margin-top:16px;padding:12px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:800;font-size:15px}#msg{min-height:22px;margin-top:14px;font-size:14px;line-height:1.4}.back{display:block;text-align:center;margin-top:14px;color:#2563eb;text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<main class="card">
+<h1>Новий пароль</h1>
+<div class="sub">Введи новий пароль для акаунта FERMA PRO.</div>
+<form id="reset-form">
+<label for="password">Новий пароль</label>
+<input id="password" type="password" autocomplete="new-password" minlength="6" required>
+<label for="password2">Повтори пароль</label>
+<input id="password2" type="password" autocomplete="new-password" minlength="6" required>
+<button type="submit">Змінити пароль</button>
+</form>
+<div id="msg"></div>
+<a class="back" href="login.html">Повернутися до входу</a>
+</main>
+</body>
+</html>
