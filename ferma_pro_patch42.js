@@ -30,5 +30,8 @@ async function normalizeLayer42(){
   if(typeof load==='function')await load();
  }catch(e){console.error('FERMA v42 layer normalization',e)}
 }
+function canonicalRecipePhase42(v){const s=String(v||'').trim();if(!s)return s;if(s==='Вирощування'||s==='Вирощування несучок'||/Вирощування\s*1[–-]140\s*день/i.test(s))return 'Вирощування';if(s==='Кладка'||/Кладка\s*140\+/i.test(s))return 'Кладка';return s}
+const previousRecipeForm42=window.recipeForm;
+if(typeof previousRecipeForm42==='function')window.recipeForm=async function(id){await previousRecipeForm42(id);const f=document.getElementById('recipeForm39');if(!f?.phase)return;for(const o of [...f.phase.options])o.value=canonicalRecipePhase42(o.value);f.phase.value=canonicalRecipePhase42(f.phase.value)};
 let tries42=0;const timer42=setInterval(()=>{if(window.user&&window.db){clearInterval(timer42);normalizeLayer42()}else if(++tries42>120)clearInterval(timer42)},500);
 })();
